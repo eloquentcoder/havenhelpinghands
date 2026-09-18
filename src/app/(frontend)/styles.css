@@ -44,60 +44,67 @@
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+/* These element-level rules must live in @layer base. Unlayered CSS beats
+   every layered rule regardless of specificity, so an unlayered
+   `a { color: inherit }` silently overrode every Tailwind text-colour
+   utility on links — the hero's Donate label rendered in its own
+   background colour. */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
-html {
-  -webkit-text-size-adjust: 100%;
-  scroll-behavior: smooth;
-  /* Reserve the scrollbar's width so locking scroll for the mobile menu does
-     not shift the page and expose a strip beside the header. */
-  scrollbar-gutter: stable;
-}
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+    /* Reserve the scrollbar's width so locking scroll for the mobile menu does
+       not shift the page and expose a strip beside the header. */
+    scrollbar-gutter: stable;
+  }
 
-body {
-  margin: 0;
-  background: var(--color-paper-50);
-  color: var(--color-ink-900);
-  font-family: var(--font-sans);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-}
+  body {
+    margin: 0;
+    background: var(--color-paper-50);
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
 
-h1,
-h2,
-h3 {
-  font-family: var(--font-display);
-  line-height: 1.06;
-  letter-spacing: -0.015em;
-  text-wrap: balance;
-  font-weight: 500;
-  margin: 0;
-}
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    line-height: 1.06;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    font-weight: 500;
+    margin: 0;
+  }
 
-p {
-  text-wrap: pretty;
-}
+  p {
+    text-wrap: pretty;
+  }
 
-a {
-  color: inherit;
-}
+  a {
+    color: inherit;
+  }
 
-img,
-svg,
-video {
-  display: block;
-  max-width: 100%;
-  height: auto;
-}
+  img,
+  svg,
+  video {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
 
-:focus-visible {
-  outline: 2px solid var(--color-brass-400);
-  outline-offset: 3px;
-  border-radius: 2px;
+  :focus-visible {
+    outline: 2px solid var(--color-brass-400);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
 }
 
 /* The arch: a half-round top on a rectangular base. Repeated at several scales,

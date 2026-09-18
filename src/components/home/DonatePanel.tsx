@@ -2,13 +2,14 @@
 
 import { useState } from 'react'
 
-const AMOUNTS = [5000, 10000, 25000, 50000, 100000]
+const AMOUNTS = [5000, 10000, 25000, 50000]
 
 const naira = (value: number) => `₦${value.toLocaleString('en-NG')}`
 
 /**
- * Picking an amount before leaving the site makes the decision here rather than
- * on the payment page, which is where most people drop out.
+ * Sits inside the hero's colour block. Choosing an amount before leaving the
+ * site puts the decision here rather than on the payment page, which is where
+ * most people drop out.
  *
  * No impact claims sit against these figures — "₦10,000 feeds a family for a
  * week" would be a specific promise the organisation has not made.
@@ -23,13 +24,8 @@ export function DonatePanel({ paystackUrl }: { paystackUrl?: string | null }) {
     : '/get-involved'
 
   return (
-    <div className="rounded-2xl bg-paper-50 p-7 text-ink-900 shadow-2xl shadow-teal-950/40 sm:p-8">
-      <h2 className="font-display text-2xl">Give today</h2>
-      <p className="mt-2 text-sm text-ink-500">
-        Your gift supports outreaches, community programmes and the shelters we are working to open.
-      </p>
-
-      <div className="mt-6 grid grid-cols-3 gap-2.5">
+    <div>
+      <div className="flex flex-wrap gap-2.5">
         {AMOUNTS.map((value) => {
           const selected = amount === value
           return (
@@ -38,10 +34,10 @@ export function DonatePanel({ paystackUrl }: { paystackUrl?: string | null }) {
               type="button"
               onClick={() => setAmount(value)}
               aria-pressed={selected}
-              className={`rounded-lg py-3 text-sm font-semibold transition-colors ${
+              className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
                 selected
-                  ? 'bg-teal-500 text-paper-50'
-                  : 'bg-paper-100 text-ink-700 hover:bg-teal-50'
+                  ? 'bg-teal-950 text-paper-50'
+                  : 'bg-teal-950/10 text-teal-950 hover:bg-teal-950/20'
               }`}
             >
               {naira(value)}
@@ -52,8 +48,10 @@ export function DonatePanel({ paystackUrl }: { paystackUrl?: string | null }) {
           type="button"
           onClick={() => setAmount(null)}
           aria-pressed={amount === null}
-          className={`rounded-lg py-3 text-sm font-semibold transition-colors ${
-            amount === null ? 'bg-teal-500 text-paper-50' : 'bg-paper-100 text-ink-700 hover:bg-teal-50'
+          className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
+            amount === null
+              ? 'bg-teal-950 text-paper-50'
+              : 'bg-teal-950/10 text-teal-950 hover:bg-teal-950/20'
           }`}
         >
           Other
@@ -62,18 +60,16 @@ export function DonatePanel({ paystackUrl }: { paystackUrl?: string | null }) {
 
       <a
         href={href}
-        className="mt-5 block rounded-full bg-brass-400 py-4 text-center font-semibold text-teal-950 transition-colors hover:bg-brass-300"
+        className="mt-7 inline-flex items-center justify-center rounded-lg bg-teal-950 px-9 py-4 font-semibold text-paper-50 transition-transform duration-200 hover:-translate-y-0.5"
       >
         {amount ? `Donate ${naira(amount)}` : 'Choose an amount'}
       </a>
 
-      {paystackUrl ? (
-        <p className="mt-4 text-center text-xs text-ink-400">Secure payment through Paystack</p>
-      ) : (
-        <p className="mt-4 text-center text-xs text-ink-400">
+      {!paystackUrl ? (
+        <p className="mt-4 max-w-xs text-xs text-teal-950/70">
           Add your Paystack link in Site settings to start taking gifts here.
         </p>
-      )}
+      ) : null}
     </div>
   )
 }

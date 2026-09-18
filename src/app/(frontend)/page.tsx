@@ -71,14 +71,33 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* Hero. A photograph belongs in the left panel; until one is uploaded it
-          falls back to the arch from the logo rather than an empty frame. The
-          giving panel sits in the hero deliberately — the decision to give is
-          made here, not two clicks away. */}
-      <section className="relative bg-teal-950 text-paper-50">
-        <Container className="grid gap-12 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16 lg:py-20">
-          <div>
-            <h1 className="font-display text-[clamp(2.5rem,5.2vw,4.25rem)]">
+      {/* Hero: a hard split. The left half belongs to a photograph of the
+          people served — until one is uploaded it holds the arch from the logo
+          rather than an empty frame. The right half is the giving block, so the
+          decision to give is made on the first screen. */}
+      <section className="grid lg:min-h-[calc(100svh-68px)] lg:grid-cols-2">
+        <div className="relative flex min-h-[26rem] flex-col justify-end overflow-hidden bg-teal-950 p-8 text-paper-50 sm:p-12 lg:p-14">
+          {heroImage?.url ? (
+            <>
+              <Image
+                src={heroImage.url}
+                alt={heroImage.alt ?? ''}
+                fill
+                priority
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                className="object-cover grayscale"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-teal-950 via-teal-950/70 to-teal-950/20" />
+            </>
+          ) : (
+            <div
+              aria-hidden="true"
+              className="arch arch-open absolute top-1/2 left-1/2 h-[80%] w-[70%] -translate-x-1/2 -translate-y-[55%] bg-gradient-to-b from-teal-800 to-teal-950"
+            />
+          )}
+
+          <div className="relative">
+            <h1 className="font-display text-[clamp(2.5rem,4.6vw,4rem)]">
               {headlineLines.map((line, i) => (
                 <span
                   key={line}
@@ -91,56 +110,59 @@ export default async function HomePage() {
             </h1>
 
             <p
-              className="rise mt-7 max-w-lg text-lg leading-relaxed text-teal-100"
-              style={{ animationDelay: '0.55s' }}
+              className="rise mt-6 max-w-md leading-relaxed text-teal-100"
+              style={{ animationDelay: '0.5s' }}
             >
               {home.subtext}
             </p>
 
-            <div className="rise mt-9 flex flex-wrap items-center gap-6" style={{ animationDelay: '0.7s' }}>
-              <Link
-                href="/programs"
-                className="rounded-full px-6 py-3 font-semibold ring-1 ring-teal-400/50 transition-colors hover:bg-teal-900"
+            <Link
+              href="/programs"
+              className="rise group mt-8 inline-flex items-center gap-3 font-semibold text-paper-50"
+              style={{ animationDelay: '0.65s' }}
+            >
+              See our work
+              <span
+                aria-hidden="true"
+                className="transition-transform duration-300 group-hover:translate-x-1.5"
               >
-                See our work
-              </Link>
-              <Link href="/get-involved" className="font-semibold text-brass-300 underline-offset-4 hover:underline">
-                Other ways to help
-              </Link>
-            </div>
+                &rarr;
+              </span>
+            </Link>
+          </div>
+        </div>
 
-            <dl className="rise mt-12 grid max-w-md grid-cols-3 gap-6 border-t border-teal-800 pt-7" style={{ animationDelay: '0.85s' }}>
-              {[
-                ['4', 'systems of care'],
-                ['2025', 'registered'],
-                [settings.address?.city ?? 'Nigeria', 'where we work'],
-              ].map(([value, label]) => (
-                <div key={label}>
-                  <dt className="font-display text-2xl text-brass-400">{value}</dt>
-                  <dd className="mt-1 text-xs leading-snug text-teal-300">{label}</dd>
-                </div>
-              ))}
-            </dl>
+        <div className="flex flex-col justify-center bg-brass-400 p-8 text-teal-950 sm:p-12 lg:p-14">
+          <p className="text-sm font-semibold">Give today</p>
+
+          <h2 className="mt-8 max-w-md font-display text-[clamp(1.9rem,2.9vw,2.6rem)] leading-[1.1]">
+            Support healing, shelter and empowerment
+          </h2>
+
+          <p className="mt-5 max-w-md leading-relaxed text-teal-950/80">
+            Your gift funds outreaches, community programmes and the safe haven shelters we are
+            working to open.
+          </p>
+
+          <div className="mt-9">
+            <DonatePanel paystackUrl={settings.paystackUrl} />
           </div>
 
-          <div className="rise" style={{ animationDelay: '0.35s' }}>
-            {heroImage?.url ? (
-              <div className="arch relative aspect-[4/5] overflow-hidden">
-                <Image
-                  src={heroImage.url}
-                  alt={heroImage.alt ?? ''}
-                  fill
-                  priority
-                  sizes="(min-width: 1024px) 45vw, 100vw"
-                  className="object-cover"
-                />
+          {/* Facts, not fundraising totals. HHHI has no campaign figures to
+              report, and inventing a goal or a raised amount would be a lie. */}
+          <dl className="mt-10 grid gap-px overflow-hidden rounded-xl bg-teal-950/15 sm:grid-cols-3">
+            {[
+              ['Registered', '2025'],
+              ['Based in', settings.address?.city ?? 'Nigeria'],
+              ['Systems of care', String(systems.length || 4)],
+            ].map(([label, value]) => (
+              <div key={label} className="bg-brass-400 px-5 py-4">
+                <dt className="text-xs text-teal-950/70">{label}</dt>
+                <dd className="mt-0.5 font-display text-xl">{value}</dd>
               </div>
-            ) : null}
-            <div className={heroImage?.url ? '-mt-16 px-4' : ''}>
-              <DonatePanel paystackUrl={settings.paystackUrl} />
-            </div>
-          </div>
-        </Container>
+            ))}
+          </dl>
+        </div>
       </section>
 
       {/* Mission */}
