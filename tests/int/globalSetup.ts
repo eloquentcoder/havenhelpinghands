@@ -11,6 +11,8 @@ import { config as loadEnv } from 'dotenv'
  */
 export default async function setup() {
   loadEnv({ path: '.env.test', override: true })
+  // The test database is disposable, so push builds it directly rather than
+  // replaying migrations. Everywhere else runs migrations instead.
   process.env.PAYLOAD_PUSH = 'true'
 
   // Imported dynamically so the env above is set before the config is read.

@@ -56,11 +56,14 @@ export default buildConfig({
       // Ignored for local `file:` URLs; required for a remote Turso database.
       authToken: process.env.DATABASE_AUTH_TOKEN,
     },
-    // Dev schema sync, on everywhere except the test suite. Each integration
-    // test file boots its own Payload instance, and letting all of them push
-    // the schema raced on "index ... already exists". The suite pushes once in
-    // tests/int/globalSetup.ts instead.
-    push: process.env.PAYLOAD_PUSH !== 'false',
+    // Schema is managed by migrations in src/migrations, not by dev push.
+    //
+    // Drizzle's push repeatedly tried to CREATE INDEX for indexes that already
+    // existed ("index site_settings_logo_idx already exists"), which broke the
+    // running dev server, not just the test suite. Migrations are explicit,
+    // reviewable and the same mechanism production needs, so push is off
+    // everywhere except when a test run is building a throwaway database.
+    push: process.env.PAYLOAD_PUSH === 'true',
   }),
   sharp,
   plugins: [],
