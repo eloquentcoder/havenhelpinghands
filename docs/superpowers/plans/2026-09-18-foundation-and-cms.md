@@ -32,6 +32,29 @@ Note the convention: integration tests are named `*.int.spec.ts`, not
 
 ---
 
+## Decisions carried forward
+
+Settled during review of Tasks 3-4, recorded so all four routed collections
+behave identically.
+
+**Slug collisions fail loudly.** `slugField()` sets `unique: true` with no
+auto-deduplication. A second Program titled "Borehole Drive" is rejected with a
+validation error bound to the slug field, and the editor types a different one.
+Appending "-2" was rejected as the alternative: silently handing an editor a URL
+they did not choose undermines the same guarantee that keeps a slug stable when a
+title is reworded. Duplicate titles are likely for an NGO ("2024 Annual Report",
+"Volunteer Day"), so the field description tells editors what to do.
+
+**Reserved slugs are guarded at Task 11.** Pages render at the site root
+(`/[slug]`), so a Page slugged `admin`, `api`, `programs`, `blog`, `events` or
+`donate` would shadow a real route. `unique` is scoped per collection and cannot
+catch this. Task 11 adds an explicit reserved list — cheap now, awkward to
+retrofit once content exists.
+
+**Slug length is unbounded for now.** A 300-character title yields a
+300-character URL. Not worth a `maxLength` that would block a save; revisit with
+truncation in `slugify` if it becomes a real problem.
+
 ## File Structure
 
 Files created by this plan, and what each is responsible for.
@@ -1581,6 +1604,48 @@ export const Pages: CollectionConfig = {
   ],
 }
 ```
+
+- [ ] **Step 2b: Guard reserved slugs**
+
+Pages render at the site root, so a Page slugged `admin` would shadow the CMS.
+`unique` is per-collection and cannot catch that. Add to `src/fields/slug.ts`,
+alongside the existing field definition:
+
+```ts
+/** Slugs that would shadow a real route if a Page claimed them. */
+const RESERVED = new Set(['admin', 'api', 'programs', 'blog', 'events', 'donate', 'next'])
+```
+
+Then give `slugField` an optional guard, leaving its existing behaviour intact
+for every other collection:
+
+```ts
+export const slugField = (fallbackField = 'title', { reserved = false } = {}): Field => ({
+  // ...existing properties unchanged...
+  validate: reserved
+    ? (value: unknown) =>
+        typeof value === 'string' && RESERVED.has(value)
+          ? `"${value}" is reserved by the site. Choose a different web address.`
+          : true
+    : undefined,
+})
+```
+
+In `Pages.ts`, call it as `slugField('title', { reserved: true })`. Every other
+collection keeps calling `slugField()`.
+
+Add to `tests/unit/formatSlugHook.test.ts` or a new `tests/unit/slugField.test.ts`:
+
+```ts
+it('rejects a reserved slug only when the guard is enabled', () => {
+  const guarded = slugField('title', { reserved: true })
+  const plain = slugField()
+  expect(typeof guarded.validate).toBe('function')
+  expect(plain.validate).toBeUndefined()
+})
+```
+
+Run `npm run test:unit` and confirm it passes before continuing.
 
 - [ ] **Step 3: Register it**
 
