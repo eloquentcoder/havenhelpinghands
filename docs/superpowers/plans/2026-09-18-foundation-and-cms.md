@@ -51,6 +51,14 @@ title is reworded. Duplicate titles are likely for an NGO ("2024 Annual Report",
 catch this. Task 11 adds an explicit reserved list — cheap now, awkward to
 retrofit once content exists.
 
+**Editors own their own account.** Collection-level `update: isAdmin` on Users
+locked editors out of their own record — they could not change their own name or
+password, so every password reset would need an admin. `read` and `update` are
+`adminOrSelf` instead. Self-promotion is blocked by field-level access on `role`,
+which Payload enforces by *silently discarding* the value rather than rejecting
+the write, so the regression test in `tests/int/access.int.spec.ts` asserts on the
+stored role rather than on whether the call threw.
+
 **Slug length is unbounded for now.** A 300-character title yields a
 300-character URL. Not worth a `maxLength` that would block a save; revisit with
 truncation in `slugify` if it becomes a real problem.
@@ -980,7 +988,20 @@ import { Programs } from '@/collections/Programs'
 collections: [Users, Media, Programs],
 ```
 
-- [ ] **Step 3: Point integration tests at the test database**
+- [x] **Step 3: Point integration tests at the test database** — ALREADY DONE
+
+This was pulled forward during Task 5, because integration tests needed to write
+users safely. `vitest.setup.ts` now loads `.env.test` with `override: true`, and
+`vitest.config.mts` carries the timeouts and `fileParallelism: false`. Verify it
+still holds rather than redoing it:
+
+```bash
+npm run test:int && ls helpinghive-test.db
+```
+
+The original instructions are kept below for reference.
+
+**Original: Point integration tests at the test database**
 
 `vitest.config.mts` and the `test:int` script already exist. The problem is
 `vitest.setup.ts`, which currently does a bare `import 'dotenv/config'` — that
