@@ -286,7 +286,7 @@ Add to the `scripts` block in `package.json`, and extend `test` to run both suit
 `test:e2e` stays available on its own; it needs a running server, so it is not
 part of the default `test` run.
 
-- [ ] **Step 3: Write the failing test**
+- [ ] **Step 2: Write the failing test**
 
 Create `tests/unit/slug.test.ts`:
 
@@ -321,7 +321,7 @@ describe('slugify', () => {
 })
 ```
 
-- [ ] **Step 4: Run the test to verify it fails**
+- [ ] **Step 3: Run the test to verify it fails**
 
 ```bash
 npm run test:unit
@@ -329,7 +329,7 @@ npm run test:unit
 
 Expected: FAIL — `Failed to resolve import "@/lib/slug"`
 
-- [ ] **Step 5: Write the implementation**
+- [ ] **Step 4: Write the implementation**
 
 Create `src/lib/slug.ts`:
 
@@ -344,15 +344,15 @@ Create `src/lib/slug.ts`:
 export function slugify(input: string): string {
   return input
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
-    .replace(/['’]/g, '')
+    .replace(/['\u2019]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
 }
 ```
 
-- [ ] **Step 6: Run the test to verify it passes**
+- [ ] **Step 5: Run the test to verify it passes**
 
 ```bash
 npm run test:unit
@@ -360,7 +360,7 @@ npm run test:unit
 
 Expected: PASS — `6 passed`
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
 git add -A
