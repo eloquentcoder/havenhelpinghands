@@ -52,8 +52,26 @@ Rendering: static generation where content is stable, with on-demand
 revalidation fired by a Payload `afterChange` hook. An editor's published change
 goes live within seconds without a full site rebuild.
 
-**Stack:** Next.js 16, Payload 3, SQLite via libSQL, Cloudflare R2 for media,
+**Stack:** Next.js 16, Payload 3, SQLite via libSQL, local-disk media storage,
 Tailwind CSS, TypeScript.
+
+### Media storage
+
+Uploads are stored on local disk in `storage/media`, outside the build tree, the
+way Laravel keeps them in `storage/app/public`. They are served at `/media/...`
+through a rewrite to Payload's file route.
+
+Laravel's `public/storage` symlink has no working equivalent here, and this was
+verified rather than assumed. Next.js reads the `public/` directory listing once
+at server startup: a file present at startup is served, and a file an editor
+uploads afterwards returns 404 until the process restarts. The symlink itself
+resolves fine — the runtime lookup is what fails. Laravel's version works because
+nginx resolves the path per request. The rewrite restores that behaviour, since
+Payload's file route reads from disk on every request.
+
+Known limitation: a file missing from disk returns HTTP 500 rather than 404.
+That is Payload's own file route, reproduced without the rewrite. It should not
+arise in normal use, because Payload deletes files together with their records.
 
 ### Why SQLite
 
@@ -80,11 +98,13 @@ order of preference:
 
 1. Apply to the Vercel and DigitalOcean nonprofit credit programs.
 2. Railway or Render at roughly $5/month, fully compliant, with a persistent
-   disk so the SQLite file can live on the server and Turso is not needed.
-3. Vercel Hobby + Turso + R2 at zero cost, accepting the terms-of-service grey area.
+   disk holding both the SQLite file and `storage/media`.
 
-The database is free on every path: a file on disk where there is a disk, Turso's
-free tier where there is not.
+**Serverless hosting is ruled out.** Storing uploads on local disk needs a
+persistent filesystem, so Vercel and other serverless platforms are not options
+while media is stored this way. This is a deliberate trade, consistent with
+choosing SQLite. Moving to object storage later is a contained change: swap the
+upload adapter and the `/media` rewrite; no collection definition changes.
 
 This is a deployment decision, not a blocker on building.
 

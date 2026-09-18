@@ -8,11 +8,13 @@ const dirname = path.dirname(__filename)
 
 const nextConfig: NextConfig = {
   images: {
-    localPatterns: [
-      {
-        pathname: '/api/media/file/**',
-      },
-    ],
+    localPatterns: [{ pathname: '/api/media/file/**' }, { pathname: '/media/**' }],
+  },
+  // Serve uploads at a clean public path. Payload stores them on disk in
+  // storage/media and serves them through this route, which reads from disk per
+  // request — unlike Next's public folder, whose contents are fixed at startup.
+  async rewrites() {
+    return [{ source: '/media/:path*', destination: '/api/media/file/:path*' }]
   },
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {

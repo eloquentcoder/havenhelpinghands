@@ -2176,92 +2176,35 @@ git commit -m "feat: add site settings, navigation, footer and homepage globals"
 
 ---
 
-## Task 14: Cloudflare R2 media storage
+## Task 14: Local-disk media storage — DONE
 
-**Files:**
-- Modify: `src/payload.config.ts`
-- Modify: `.env`, `.env.example`
+Replaced Cloudflare R2 at the user's request: uploads go to local disk, served
+from a public path, mirroring Laravel's `storage/app/public`.
 
-Local disk storage does not survive a redeploy on a hosting platform. R2 has a free tier with no egress charges, and it speaks the S3 API.
+Implemented and verified:
 
-- [ ] **Step 1: Install the adapter**
+1. `src/collections/Media.ts` sets
+   `staticDir: path.resolve(dirname, '../../storage/media')`.
+2. `next.config.ts` rewrites `/media/:path*` to `/api/media/file/:path*`, and
+   `images.localPatterns` allows `/media/**`.
+3. `.gitignore` ignores `/storage`.
 
-```bash
-npm install @payloadcms/storage-s3
-```
+**Why not a `public/media` symlink.** Tested against a production build: Next
+reads the `public/` listing at server startup. A file present at startup served
+200; a file added while the server ran returned 404. Every editor upload would
+have been invisible until a restart. The rewrite reads from disk per request
+instead.
 
-- [ ] **Step 2: Create the bucket**
+**Verified end to end**: with a production server running, a file uploaded
+through Payload's API was fetched at `/media/<filename>` returning HTTP 200
+`image/png`, alongside its generated thumbnail.
 
-In the Cloudflare dashboard, create an R2 bucket named `helpinghive-media`, enable public access for it, and create an API token with Object Read & Write. Record the account-specific S3 endpoint and the public bucket URL.
+**Known limitation**: a file missing from disk returns 500, not 404. This is
+Payload's file route — reproduced without the rewrite — and should not arise
+normally, since Payload deletes files with their records.
 
-- [ ] **Step 3: Add the credentials to `.env`**
-
-```
-R2_BUCKET=helpinghive-media
-R2_ACCESS_KEY_ID=...
-R2_SECRET_ACCESS_KEY=...
-R2_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
-R2_PUBLIC_URL=https://pub-<hash>.r2.dev
-```
-
-- [ ] **Step 4: Wire up the plugin**
-
-In `src/payload.config.ts`:
-
-```ts
-import { s3Storage } from '@payloadcms/storage-s3'
-```
-
-Add to the config object:
-
-```ts
-plugins: [
-  s3Storage({
-    // Disabled when credentials are absent, so local development and the test
-    // suite keep writing to disk and need no cloud account.
-    enabled: Boolean(process.env.R2_BUCKET),
-    collections: {
-      media: {
-        prefix: 'media',
-        generateFileURL: ({ filename, prefix }) =>
-          `${process.env.R2_PUBLIC_URL}/${prefix}/${filename}`,
-      },
-    },
-    bucket: process.env.R2_BUCKET || '',
-    config: {
-      endpoint: process.env.R2_ENDPOINT,
-      region: 'auto',
-      credentials: {
-        accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
-      },
-    },
-  }),
-],
-```
-
-- [ ] **Step 5: Verify**
-
-```bash
-npm run dev
-```
-
-Upload an image in the admin panel. Expected: the image preview loads, and its URL begins with the `R2_PUBLIC_URL` value. Confirm the object appears in the R2 bucket. Stop the server.
-
-- [ ] **Step 6: Confirm tests still pass without credentials**
-
-```bash
-npm test
-```
-
-Expected: PASS for both suites. `.env.test` has no R2 variables, so the plugin stays disabled.
-
-- [ ] **Step 7: Commit**
-
-```bash
-git add -A
-git commit -m "feat: store media in Cloudflare R2"
-```
+**Deployment**: `storage/media` must be on a persistent disk or mounted volume.
+Serverless hosting is incompatible while media is stored this way.
 
 ---
 
