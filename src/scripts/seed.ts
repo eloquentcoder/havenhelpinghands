@@ -221,7 +221,17 @@ try {
       description:
         'A faith-based non-profit in Abuja, Nigeria, dedicated to the healing, restoration and empowerment of vulnerable women, children and communities.',
       email: 'hhhinitiative@gmail.com',
-      address: { city: 'Abuja', country: 'Nigeria' },
+      // Explicitly blanked, not omitted. updateGlobal merges, so any field left
+      // out keeps whatever was there before — which is how an invented CAC
+      // number and street address survived the content re-alignment and went on
+      // rendering as trust signals. The owner has not supplied these.
+      registrationNumber: '',
+      phone: '',
+      // The owner has not supplied a Paystack link. An earlier seed invented
+      // one, and because updateGlobal merges, it survived the content
+      // re-alignment and the Donate button went on pointing at it.
+      paystackUrl: '',
+      address: { street: '', city: 'Abuja', state: '', country: 'Nigeria' },
       socials: [{ platform: 'instagram', url: 'https://instagram.com/the_healinghands_initiative' }],
     },
   })
