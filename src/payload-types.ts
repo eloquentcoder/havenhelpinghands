@@ -74,6 +74,7 @@ export interface Config {
     partners: Partner;
     categories: Category;
     posts: Post;
+    events: Event;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -88,6 +89,7 @@ export interface Config {
     partners: PartnersSelect<false> | PartnersSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    events: EventsSelect<false> | EventsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -429,6 +431,71 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events".
+ */
+export interface Event {
+  id: number;
+  title: string;
+  summary: string;
+  coverImage?: (number | null) | Media;
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  startsAt: string;
+  endsAt?: string | null;
+  /**
+   * For example "Freedom Park, Lagos Island".
+   */
+  venue?: string | null;
+  address?: string | null;
+  /**
+   * Where people sign up. Leave blank if no registration is needed.
+   */
+  registrationUrl?: string | null;
+  seo?: {
+    /**
+     * Shown as the headline in Google. Aim for under 60 characters. Defaults to the title.
+     */
+    metaTitle?: string | null;
+    /**
+     * The grey text under the headline in Google. Aim for 150-160 characters. Defaults to the summary.
+     */
+    metaDescription?: string | null;
+    /**
+     * The picture shown when this page is shared on WhatsApp, Facebook or X. Defaults to the hero image.
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Only fill this in if this content was first published elsewhere and that version should rank instead.
+     */
+    canonicalUrl?: string | null;
+    /**
+     * Hide this page from Google. The page stays reachable by anyone with the link.
+     */
+    noindex?: boolean | null;
+  };
+  /**
+   * The web address for this page. Leave blank to generate it from the title. If another entry already uses the same address, type a different one here.
+   */
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -478,6 +545,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: number | Post;
+      } | null)
+    | ({
+        relationTo: 'events';
+        value: number | Event;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -708,6 +779,34 @@ export interface PostsSelect<T extends boolean = true> {
         noindex?: T;
       };
   publishedAt?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "events_select".
+ */
+export interface EventsSelect<T extends boolean = true> {
+  title?: T;
+  summary?: T;
+  coverImage?: T;
+  body?: T;
+  startsAt?: T;
+  endsAt?: T;
+  venue?: T;
+  address?: T;
+  registrationUrl?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        canonicalUrl?: T;
+        noindex?: T;
+      };
   slug?: T;
   updatedAt?: T;
   createdAt?: T;
