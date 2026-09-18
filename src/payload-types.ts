@@ -73,6 +73,7 @@ export interface Config {
     team: Team;
     partners: Partner;
     categories: Category;
+    posts: Post;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -86,6 +87,7 @@ export interface Config {
     team: TeamSelect<false> | TeamSelect<true>;
     partners: PartnersSelect<false> | PartnersSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -351,6 +353,81 @@ export interface Category {
   createdAt: string;
 }
 /**
+ * Stories, news and updates. This is the main source of search traffic.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  title: string;
+  /**
+   * A short teaser shown on the blog listing and used as the search description.
+   */
+  excerpt: string;
+  coverImage?: (number | null) | Media;
+  body: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  author?: (number | null) | Team;
+  category?: (number | null) | Category;
+  tags?:
+    | {
+        tag: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Link this story to the programs it is about.
+   */
+  relatedPrograms?: (number | Program)[] | null;
+  seo?: {
+    /**
+     * Shown as the headline in Google. Aim for under 60 characters. Defaults to the title.
+     */
+    metaTitle?: string | null;
+    /**
+     * The grey text under the headline in Google. Aim for 150-160 characters. Defaults to the summary.
+     */
+    metaDescription?: string | null;
+    /**
+     * The picture shown when this page is shared on WhatsApp, Facebook or X. Defaults to the hero image.
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Only fill this in if this content was first published elsewhere and that version should rank instead.
+     */
+    canonicalUrl?: string | null;
+    /**
+     * Hide this page from Google. The page stays reachable by anyone with the link.
+     */
+    noindex?: boolean | null;
+  };
+  /**
+   * Set automatically when you first publish.
+   */
+  publishedAt?: string | null;
+  /**
+   * The web address for this page. Leave blank to generate it from the title. If another entry already uses the same address, type a different one here.
+   */
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -397,6 +474,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'categories';
         value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: number | Post;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -598,6 +679,39 @@ export interface CategoriesSelect<T extends boolean = true> {
   slug?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  excerpt?: T;
+  coverImage?: T;
+  body?: T;
+  author?: T;
+  category?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  relatedPrograms?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        canonicalUrl?: T;
+        noindex?: T;
+      };
+  publishedAt?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
