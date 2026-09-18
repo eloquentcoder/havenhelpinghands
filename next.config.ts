@@ -8,7 +8,15 @@ const dirname = path.dirname(__filename)
 
 const nextConfig: NextConfig = {
   images: {
-    localPatterns: [{ pathname: '/api/media/file/**' }, { pathname: '/media/**' }],
+    // Setting localPatterns restricts EVERY local image, not just the ones
+    // listed — so the static brand assets need entries too, or next/image
+    // rejects them with "Invalid src prop".
+    localPatterns: [
+      { pathname: '/api/media/file/**' },
+      { pathname: '/media/**' },
+      { pathname: '/logo.png' },
+      { pathname: '/logo-mark.png' },
+    ],
   },
   // Serve uploads at a clean public path. Payload stores them on disk in
   // storage/media and serves them through this route, which reads from disk per
