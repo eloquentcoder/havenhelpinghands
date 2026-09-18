@@ -133,15 +133,40 @@ strings — invalid structured data is worse than none.
 
 `npm run test:unit`, `npx tsc --noEmit`, `npm run lint`, then commit.
 
-### Task 2: Brand tokens — BLOCKED pending assets
+### Task 2: Brand tokens — DONE
 
-Needs the owner's logo files and hex colours. Do not invent a palette; a
-placeholder palette would have to be undone across every component.
+Owner supplied `logo.PNG`. Decisions made from it:
 
-When assets arrive: define colour, type and spacing tokens as CSS custom
-properties in `src/app/(frontend)/styles.css` under `@theme`, self-host the
-typeface with `next/font`, and delete the template's black `html`/`body` rules
-and the `.home` styles left over from the Payload blank template.
+- **Brand teal `#006D77`**, sampled from the logo mark (13,608 px of it — the
+  dominant non-text colour). Contrast on white is 6.09:1, so it passes AA for
+  body text.
+- **Warm accent `#d9714f`** and sand neutrals, because an all-teal palette reads
+  cold and clinical for a site whose job is emotional connection. The accent is
+  documented as large-text-only: it does not reach 4.5:1 on white.
+- **Playfair Display + Inter.** Playfair is near-identical to the logo's
+  wordmark, so headings extend the mark rather than competing with it.
+- **The `vietnamese` Google Fonts subset is loaded deliberately.** Google files
+  the dot-below characters Yoruba and Igbo need — Ẹ ẹ Ọ ọ Ị ị Ụ ụ Ṣ ṣ — under
+  that subset, not latin-ext. Without it those letters fall back mid-word.
+
+Assets generated from the source PNG (which has a genuine alpha channel):
+`public/logo.png` (trimmed lockup, 381×410), `public/logo-mark.png` (167×167),
+`src/app/icon.png`, `src/app/apple-icon.png`.
+
+**Still to verify:** whether Inter and Playfair carry the Hausa hooked
+consonants ɓ ɗ ƙ ƴ (U+0253, U+0257, U+0199, U+01B4). U+0199 and U+01B4 fall in
+latin-ext; U+0253 and U+0257 are in IPA Extensions and may not be covered. Check
+against real content before relying on it.
+
+### Task 3: Layout shell and homepage — DONE (first pass)
+
+`Header` and `Footer` read the Navigation, Footer and Site Settings globals.
+The homepage renders the Homepage global with its impact stats and featured
+programmes.
+
+Every image slot degrades deliberately: the hero falls back to a teal gradient
+and programme cards to a tinted panel with the logo mark, because the seed
+contains no photographs and the site must not show broken image frames.
 
 ### Tasks 3 onward
 

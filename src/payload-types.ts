@@ -228,7 +228,7 @@ export interface Media {
   };
 }
 /**
- * The initiatives Helping Hands runs. Each one gets its own page.
+ * The initiatives Haven Healing Hands runs. Each one gets its own page.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "programs".

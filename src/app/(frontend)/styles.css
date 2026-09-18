@@ -1,166 +1,119 @@
 @import 'tailwindcss';
 
-:root {
-  --font-mono: 'Roboto Mono', monospace;
+/*
+ * Brand tokens for Haven Healing Hands Initiative.
+ *
+ * The teal is sampled from the logo (#006D77). The warm sand and terracotta
+ * exist to stop an all-teal palette reading cold and clinical — this is a site
+ * about people, led by photography.
+ */
+@theme {
+  /* Brand teal, sampled from the logo mark */
+  --color-brand-50: #eef6f6;
+  --color-brand-100: #d3e8e9;
+  --color-brand-200: #a7d1d4;
+  --color-brand-300: #6fb2b7;
+  --color-brand-400: #3a8f97;
+  --color-brand-500: #006d77;
+  --color-brand-600: #005b64;
+  --color-brand-700: #004a52;
+  --color-brand-800: #003a41;
+  --color-brand-900: #002a30;
+
+  /* Warm accent. Use for emphasis and large text only — it does not reach
+     4.5:1 on white, so it must never carry body copy or small links. */
+  --color-accent-100: #fdeee8;
+  --color-accent-300: #f0b7a3;
+  --color-accent-500: #d9714f;
+  --color-accent-700: #a94e30;
+
+  /* Warm neutrals rather than grey, so photographs sit on a surface that
+     feels like paper instead of a screen. */
+  --color-sand-50: #fdfbf8;
+  --color-sand-100: #f8f3ec;
+  --color-sand-200: #ece4d9;
+  --color-sand-300: #d9cec0;
+
+  --color-ink-900: #1c1a17;
+  --color-ink-700: #3d3935;
+  --color-ink-500: #6b645c;
+  --color-ink-300: #9a9289;
+
+  --font-display: var(--font-display), ui-serif, Georgia, serif;
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
 }
 
-* {
+:root {
+  --surface: var(--color-sand-50);
+  --surface-raised: #ffffff;
+  --text: var(--color-ink-900);
+  --text-muted: var(--color-ink-500);
+  --border: var(--color-sand-200);
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
 html {
-  font-size: 18px;
-  line-height: 32px;
-
-  background: rgb(0, 0, 0);
-  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
 
-html,
-body,
-#app {
-  height: 100%;
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 body {
-  font-family: system-ui;
-  font-size: 18px;
-  line-height: 32px;
-
   margin: 0;
-  color: rgb(1000, 1000, 1000);
-
-  @media (max-width: 1024px) {
-    font-size: 15px;
-    line-height: 24px;
-  }
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-h1 {
-  margin: 40px 0;
-  font-size: 64px;
-  line-height: 70px;
-  font-weight: bold;
-
-  @media (max-width: 1024px) {
-    margin: 24px 0;
-    font-size: 42px;
-    line-height: 42px;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 38px;
-    line-height: 38px;
-  }
-
-  @media (max-width: 400px) {
-    font-size: 32px;
-    line-height: 32px;
-  }
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
 }
 
 p {
-  margin: 24px 0;
-
-  @media (max-width: 1024px) {
-    margin: calc(var(--base) * 0.75) 0;
-  }
+  text-wrap: pretty;
 }
 
 a {
-  color: currentColor;
-
-  &:focus {
-    opacity: 0.8;
-    outline: none;
-  }
-
-  &:active {
-    opacity: 0.7;
-    outline: none;
-  }
+  color: inherit;
 }
 
-svg {
-  vertical-align: middle;
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+  height: auto;
 }
 
-.home {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  height: 100vh;
-  padding: 45px;
-  max-width: 1024px;
-  margin: 0 auto;
-  overflow: hidden;
-
-  @media (max-width: 400px) {
-    padding: 24px;
-  }
-
-  .content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex-grow: 1;
-
-    h1 {
-      text-align: center;
-    }
-  }
-
-  .links {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    a {
-      text-decoration: none;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-    }
-
-    .admin {
-      color: rgb(0, 0, 0);
-      background: rgb(1000, 1000, 1000);
-      border: 1px solid rgb(0, 0, 0);
-    }
-
-    .docs {
-      color: rgb(1000, 1000, 1000);
-      background: rgb(0, 0, 0);
-      border: 1px solid rgb(1000, 1000, 1000);
-    }
-  }
-
-  .footer {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    @media (max-width: 1024px) {
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    p {
-      margin: 0;
-    }
-
-    .codeLink {
-      text-decoration: none;
-      padding: 0 0.5rem;
-      background: rgb(60, 60, 60);
-      border-radius: 4px;
-    }
-  }
+/* Keyboard focus must stay visible — many donors and staff navigate by keyboard. */
+:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+  border-radius: 2px;
 }

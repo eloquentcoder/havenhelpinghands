@@ -16,7 +16,7 @@ export const SiteSettings: GlobalConfig = {
               name: 'organisationName',
               type: 'text',
               required: true,
-              defaultValue: 'Helping Hands Initiative',
+              defaultValue: 'Haven Healing Hands Initiative',
             },
             {
               name: 'tagline',

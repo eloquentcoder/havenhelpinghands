@@ -1,11 +1,11 @@
-# Helping Hands Initiative — Website Design Spec
+# Haven Healing Hands Initiative — Website Design Spec
 
 **Date:** 2026-09-18
 **Status:** Approved
 
 ## Purpose
 
-A public website for Helping Hands Initiative, a Nigeria-based NGO. The site must
+A public website for Haven Healing Hands Initiative, a Nigeria-based NGO. The site must
 establish credibility with grantmakers, partners and press; rank in organic
 search; and let non-technical staff publish content without a developer.
 

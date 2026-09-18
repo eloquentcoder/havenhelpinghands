@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Stand up the Next.js + Payload application with every content schema in place, so Helping Hands staff can log in and enter real content before a single public page exists.
+**Goal:** Stand up the Next.js + Payload application with every content schema in place, so Haven Healing Hands staff can log in and enter real content before a single public page exists.
 
 **Architecture:** One Next.js 16 App Router application with Payload CMS 3 mounted inside it. Payload owns `/admin` and the database; the public site (Plan 2) will read content through Payload's in-process Local API rather than over HTTP. Content schemas live in `src/collections/`, reusable field definitions in `src/fields/`, and access rules in `src/access/` so they are unit-testable without booting the CMS.
 
@@ -14,7 +14,7 @@ so. Before writing App Router code — especially the metadata, sitemap and
 `opengraph-image` work in Plan 2 — read the relevant guide in
 `node_modules/next/dist/docs/` rather than relying on Next 15 habits.
 
-**Spec:** `docs/superpowers/specs/2026-09-18-helping-hands-ngo-site-design.md`
+**Spec:** `docs/superpowers/specs/2026-09-18-haven-healing-hands-site-design.md`
 
 **Prerequisite:** Node.js 20 or later. No database server is needed — SQLite is a file.
 
@@ -312,7 +312,7 @@ Edit `src/app/(frontend)/page.tsx` and wrap the existing content in a styled ele
 export default function HomePage() {
   return (
     <main className="mx-auto max-w-2xl p-8 text-2xl font-bold text-emerald-700">
-      Helping Hands Initiative
+      Haven Healing Hands Initiative
     </main>
   )
 }
@@ -941,7 +941,7 @@ export const Programs: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'location', 'updatedAt'],
-    description: 'The initiatives Helping Hands runs. Each one gets its own page.',
+    description: 'The initiatives Haven Healing Hands runs. Each one gets its own page.',
   },
   versions: {
     drafts: true,
@@ -1925,7 +1925,7 @@ export const SiteSettings: GlobalConfig = {
         {
           label: 'Organisation',
           fields: [
-            { name: 'organisationName', type: 'text', required: true, defaultValue: 'Helping Hands Initiative' },
+            { name: 'organisationName', type: 'text', required: true, defaultValue: 'Haven Healing Hands Initiative' },
             {
               name: 'tagline',
               type: 'text',
