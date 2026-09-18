@@ -83,25 +83,31 @@ Observed twice, by separate implementers, during Tasks 7 and 8:
 SQLITE_ERROR: index ... already exists
 ```
 
-It surfaces during Payload's dev schema push, fails one integration test file,
-and passes on an immediate re-run. It could not be reproduced in five deliberate
-attempts against a fresh database, so it was NOT fixed — churning test
-infrastructure to chase an unreproducible fault risks more than the fault costs.
+It surfaced during Payload's dev schema push, failed one integration test file,
+and passed on an immediate re-run.
+
+**FIXED after a third sighting during Task 9.** It was deferred at first, being
+unreproducible, but three occurrences across independent implementers — with more
+test files still to come — made it a pattern rather than a fluke.
 
 **Diagnosis, if it returns.** Every integration test file boots its own Payload
 instance, and each one pushes the schema — five "Pulling schema from database"
 cycles per run. That is both wasted work and the likely race.
 
-**Proposed fix.** Push the schema exactly once, then disable it for the workers:
+**The fix, as applied.** Push the schema exactly once, then disable it for the
+workers:
 
-1. Add `PAYLOAD_PUSH=false` to `.env.test`.
-2. In `src/payload.config.ts`, set `push: process.env.PAYLOAD_PUSH !== 'false'`
-   on the SQLite adapter.
-3. Add a `globalSetup` to `vitest.config.mts` that loads `.env.test`, forces
-   `PAYLOAD_PUSH=true` in its own process, and boots Payload once.
+1. `.env.test` sets `PAYLOAD_PUSH=false`.
+2. `src/payload.config.ts` sets `push: process.env.PAYLOAD_PUSH !== 'false'` on
+   the SQLite adapter. Development and production are unaffected — neither sets
+   the variable, so push stays on.
+3. `tests/int/globalSetup.ts` loads `.env.test`, forces `PAYLOAD_PUSH=true` in
+   its own process, boots Payload once, and closes the connection.
+   `vitest.config.mts` runs it via `globalSetup`.
 
-Worker processes then read `push: false` and skip the race entirely, and the
-suite gets faster. Do this if CI shows the failure, not before.
+Schema pushes per run dropped from seven to one. Verified across five
+consecutive runs — three from a fresh database, two from a persisted one — with
+19/19 integration tests passing and zero schema errors.
 
 ## File Structure
 

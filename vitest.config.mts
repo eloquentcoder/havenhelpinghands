@@ -14,6 +14,7 @@ export default defineConfig({
     // `node` is what these tests actually need.
     environment: 'node',
     setupFiles: ['./vitest.setup.ts'],
+    globalSetup: ['./tests/int/globalSetup.ts'],
     include: ['tests/int/**/*.int.spec.ts'],
     // Booting a real Payload instance is slow, and parallel files racing on one
     // SQLite file causes lock errors.

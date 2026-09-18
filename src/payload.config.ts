@@ -49,6 +49,11 @@ export default buildConfig({
       // Ignored for local `file:` URLs; required for a remote Turso database.
       authToken: process.env.DATABASE_AUTH_TOKEN,
     },
+    // Dev schema sync, on everywhere except the test suite. Each integration
+    // test file boots its own Payload instance, and letting all of them push
+    // the schema raced on "index ... already exists". The suite pushes once in
+    // tests/int/globalSetup.ts instead.
+    push: process.env.PAYLOAD_PUSH !== 'false',
   }),
   sharp,
   plugins: [],
