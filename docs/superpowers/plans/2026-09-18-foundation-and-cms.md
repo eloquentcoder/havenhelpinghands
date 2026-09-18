@@ -51,6 +51,18 @@ title is reworded. Duplicate titles are likely for an NGO ("2024 Annual Report",
 catch this. Task 11 adds an explicit reserved list — cheap now, awkward to
 retrofit once content exists.
 
+**Creating drafted documents needs an explicit `draft` flag.** Discovered in
+Task 7. Once a collection sets `versions.drafts: true`, Payload's typed local API
+requires `draft: true` or `draft: false` as a top-level option on `create` —
+putting `_status` in `data` alone does not typecheck, and the runtime overwrites
+`_status` from the flag anyway. With `draft: false` the document is fully
+validated, so every required field (including `slug`) must be supplied. Tests and
+the Task 15 seed script must both do this.
+
+**Tasks 8 and 10 are swapped.** Posts has an `author` relationship to `team`, so
+Team and Partners are built before Categories and Posts. The original ordering
+would have registered a collection referencing one that did not exist.
+
 **Editors own their own account.** Collection-level `update: isAdmin` on Users
 locked editors out of their own record — they could not change their own name or
 password, so every password reset would need an admin. `read` and `update` are
