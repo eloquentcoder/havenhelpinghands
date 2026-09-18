@@ -3,425 +3,244 @@ import config from '@payload-config'
 import { slugify } from '@/lib/slug'
 
 /**
- * Seeds the development database with plausible example content so the
- * public site built in Plan 2 has something realistic to render.
+ * Seeds the real content supplied by the owner, transcribed in
+ * docs/content/hhhi-source-content.md. That file is authoritative.
  *
- * Idempotent: it checks for a sentinel document (a program with a known
- * slug) before doing anything else, and exits immediately if seeding has
- * already happened. Safe to run repeatedly.
+ * Nothing here is invented. Where the owner has not supplied something — a
+ * registration number, a phone number, photographs, team members beyond the
+ * founder, named partners — the field is left empty rather than filled with
+ * plausible-looking filler. HHHI is a real registered organisation, so
+ * placeholder copy here reads as a factual claim about it.
  *
- * Deliberately does NOT seed images (heroImage/coverImage/photo/logo are
- * left empty) except for Partners, where `logo` is a required field — see
- * the note above `seedPartners` for why a real upload is used there instead
- * of weakening the collection.
- *
- * Deliberately does NOT create any user account; the project owner creates
- * their own through the admin UI.
+ * Consequently `partners`, `posts`, `events` and `categories` seed empty.
  */
 
-const SENTINEL_TITLE = 'Clean Water & Boreholes for Ikorodu Communities'
-const SENTINEL_SLUG = slugify(SENTINEL_TITLE)
+const textNode = (text: string) => ({
+  type: 'text',
+  text,
+  format: 0,
+  detail: 0,
+  mode: 'normal',
+  style: '',
+  version: 1,
+})
 
-const richText = (text: string) => ({
+const paragraph = (text: string) => ({
+  type: 'paragraph',
+  format: '' as const,
+  indent: 0,
+  version: 1,
+  direction: 'ltr' as const,
+  children: [textNode(text)],
+})
+
+const bulletList = (items: string[]) => ({
+  type: 'list',
+  listType: 'bullet',
+  tag: 'ul',
+  start: 1,
+  format: '' as const,
+  indent: 0,
+  version: 1,
+  direction: 'ltr' as const,
+  children: items.map((text, i) => ({
+    type: 'listitem',
+    value: i + 1,
+    format: '' as const,
+    indent: 0,
+    version: 1,
+    direction: 'ltr' as const,
+    children: [textNode(text)],
+  })),
+})
+
+const richText = (blocks: Array<string | { bullets: string[] }>) => ({
   root: {
     type: 'root',
     format: '' as const,
     indent: 0,
     version: 1,
     direction: 'ltr' as const,
-    children: [
-      {
-        type: 'paragraph',
-        format: '' as const,
-        indent: 0,
-        version: 1,
-        direction: 'ltr' as const,
-        children: [
-          { type: 'text', text, format: 0, detail: 0, mode: 'normal', style: '', version: 1 },
-        ],
-      },
-    ],
+    children: blocks.map((b) => (typeof b === 'string' ? paragraph(b) : bulletList(b.bullets))),
   },
 })
 
-async function main() {
-  const payload = await getPayload({ config: await config })
+/** The four systems HHHI operates through. */
+const SYSTEMS = [
+  {
+    title: 'The Healing System',
+    summary:
+      'Medical, emotional, and spiritual restoration through healthcare missions, community wellness, and counseling programs.',
+    goals: [
+      'Establish community medical and mental health outreach programs across 10 states in Nigeria.',
+      'Build partnerships with hospitals, physiotherapists, and mental health professionals.',
+    ],
+  },
+  {
+    title: 'The Shelter System',
+    summary:
+      'Providing refuge, rehabilitation, and safe housing for widows, women, and children in crisis.',
+    goals: [
+      'Develop at least 2 safe haven shelters for women and children by 2028.',
+      'Take at least 3 homeless families or individuals off the street by 2030.',
+      'Build, support or rent out homes for underserved and less financially privileged families.',
+      'Provide psychosocial support and rehabilitation programs for victims of abuse and homelessness.',
+    ],
+  },
+  {
+    title: 'The Empowerment System',
+    summary:
+      'Mentorship, skill development, and educational empowerment for sustainable transformation.',
+    goals: [
+      'Train and mentor 1,000 women and youth in entrepreneurship, digital skills, and personal growth.',
+      'Establish scholarship and mentorship programs for disadvantaged children.',
+    ],
+  },
+  {
+    // "MENtal" is a deliberate wordplay on MEN. Do not normalise the capitalisation.
+    title: 'The MENtal Rehab',
+    summary:
+      'A special arm dedicated to men struggling with trauma, addiction, and emotional challenges, helping them find healing, strength, and purpose.',
+    goals: [
+      'Create men’s support circles and recovery programs to address addiction, trauma, and emotional health.',
+      'Hold safe spaces for rehabilitation support for emotionally downtrodden people.',
+      'Partner with churches and mental health organizations to promote safe conversations for men.',
+    ],
+  },
+]
 
-  const existing = await payload.find({
-    collection: 'programs',
-    overrideAccess: true,
-    where: { slug: { equals: SENTINEL_SLUG } },
-    limit: 1,
-  })
+const MILESTONES = [
+  'Successfully hosted the Christmas Charity Outreach 2024, reaching two orphanages with psychological support, financial support, gifts, and love.',
+  'Partnered with other youth-led NGOs for the Back-to-School Project 2025, supporting children with educational materials and motivation.',
+  'Partnership with SMAP — Held and Healed Momcation (2025). Collaborated with a wellness support NGO, SMAP, for a transformative two-day retreat program designed for mothers dealing with postpartum depression, stress disorders, and emotional fatigue. The retreat provided clinical psychological therapy, human resource development sessions for career mothers, exercise therapy, relaxation activities, and holistic care including food, shelter, and wellness support.',
+  'Officially approved and registered as Haven Healing Hands Initiative (2025).',
+  'Launched the Mental Health Arm on World Mental Health Day 2025.',
+  'Built an active volunteer network and social media presence for awareness and impact storytelling.',
+]
 
-  if (existing.docs.length > 0) {
-    payload.logger.info('Seed sentinel found (programs/' + SENTINEL_SLUG + ') — already seeded, exiting.')
-    return
+const GET_INVOLVED = [
+  ['Fund a programme', 'Grants, sponsorships and one-off gifts supporting outreaches, community development and the safe haven shelters.'],
+  ['Volunteer your profession', 'Medical, mental health, education and logistics.'],
+  ['Partner with us', 'Local and international NGOs, corporate sponsors, churches and ministries.'],
+  ['Tell the story', 'Photographers, writers and filmmakers for impact documentation.'],
+  ['Train our team', 'Capacity-building for staff and community leaders.'],
+]
+
+const ABOUT_PARAGRAPHS = [
+  'Haven Healing Hands Initiative (HHHI) is a faith-based international non-profit dedicated to the healing, restoration, and empowerment of vulnerable women, children, and communities.',
+  'Our mission is to build safe havens where broken hearts are mended, minds are renewed, and lives are transformed through compassion, healthcare, education, and faith-driven programs.',
+  'We are deeply committed to establishing God’s kingdom on earth by spreading love, hope, and wholeness to those in need — physically, emotionally, mentally, and spiritually.',
+]
+
+const payload = await getPayload({ config })
+
+try {
+  // Remove anything seeded previously. An earlier seed asserted invented
+  // programmes and an invented founder for this real organisation, so clearing
+  // is the point rather than a convenience.
+  for (const collection of ['posts', 'events', 'pages', 'programs', 'team', 'partners', 'categories'] as const) {
+    const { docs } = await payload.find({ collection, limit: 200, depth: 0, draft: true })
+    for (const doc of docs) {
+      await payload.delete({ collection, id: doc.id })
+    }
+    if (docs.length) payload.logger.info(`cleared ${docs.length} from ${collection}`)
   }
 
-  payload.logger.info('No seed sentinel found — seeding example content.')
-
-  // ---------------------------------------------------------------------
-  // Team
-  // ---------------------------------------------------------------------
-  const executiveDirector = await payload.create({
+  const founder = await payload.create({
     collection: 'team',
     data: {
-      name: 'Adaeze Chukwu',
-      role: 'Executive Director',
+      name: 'Dr. Favour Charles',
+      role: 'Founder & Executive Director',
       group: 'staff',
-      bio: 'Adaeze founded Haven Healing Hands Initiative in 2019 after a decade working in public health across Lagos and Ogun States. She leads strategy, partnerships and fundraising.',
-      socials: {
-        linkedin: 'https://linkedin.com/in/adaeze-chukwu',
-        email: 'adaeze@helpinghandsinitiative.com',
-      },
+      bio: 'Doctor of Physiotherapy, faith-driven leader, and visionary passionate about healing and restoration.',
       order: 0,
     },
   })
 
-  const programmesLead = await payload.create({
-    collection: 'team',
-    data: {
-      name: 'Ifeoluwa Bankole',
-      role: 'Programmes Lead',
-      group: 'staff',
-      bio: 'Ifeoluwa designs and runs Haven Healing Hands’s field programmes, from borehole drilling to food distribution days, and coordinates our network of community volunteers.',
-      socials: {
-        twitter: 'https://twitter.com/ifeoluwab',
-        email: 'ifeoluwa@helpinghandsinitiative.com',
+  const programIds: number[] = []
+  for (const system of SYSTEMS) {
+    const doc = await payload.create({
+      collection: 'programs',
+      draft: false,
+      data: {
+        title: system.title,
+        slug: slugify(system.title),
+        summary: system.summary,
+        status: 'ongoing',
+        body: richText([system.summary, 'Our goals for 2025–2030:', { bullets: system.goals }]),
+        _status: 'published',
       },
-      order: 1,
-    },
-  })
+    })
+    programIds.push(doc.id)
+  }
 
-  // ---------------------------------------------------------------------
-  // Partners
-  //
-  // `logo` is required on Partners. Rather than weaken the collection to
-  // make seeding easier, a real image (tests/fixtures/sample.png) is
-  // uploaded as a media document and reused for both partners' logos.
-  // ---------------------------------------------------------------------
-  const partnerLogo = await payload.create({
-    collection: 'media',
-    data: { alt: 'Partner organisation logo placeholder' },
-    filePath: 'tests/fixtures/sample.png',
-  })
+  const page = async (title: string, standfirst: string, blocks: Array<string | { bullets: string[] }>) =>
+    payload.create({
+      collection: 'pages',
+      draft: false,
+      data: {
+        title,
+        slug: slugify(title),
+        layout: [
+          { blockType: 'hero', headline: title, subtext: standfirst },
+          { blockType: 'richText', content: richText(blocks) },
+        ],
+        _status: 'published',
+      },
+    })
 
-  await payload.create({
-    collection: 'partners',
-    data: {
-      name: 'Lagos State Ministry of Health',
-      logo: partnerLogo.id,
-      url: 'https://health.lagosstate.gov.ng',
-      order: 0,
-    },
-  })
+  await page('About Us', 'Restoring Hope. Rebuilding Lives. Reaching Nations.', ABOUT_PARAGRAPHS)
 
-  await payload.create({
-    collection: 'partners',
-    data: {
-      name: 'Sahel Relief Foundation',
-      logo: partnerLogo.id,
-      url: 'https://sahelrelief.org',
-      order: 1,
-    },
-  })
-
-  // ---------------------------------------------------------------------
-  // Categories
-  // ---------------------------------------------------------------------
-  const fieldNotesTitle = 'Field notes'
-  const fieldNotes = await payload.create({
-    collection: 'categories',
-    data: {
-      title: fieldNotesTitle,
-      slug: slugify(fieldNotesTitle),
-      description: 'Dispatches from our team and volunteers while a programme is running.',
-    },
-  })
-
-  const announcementsTitle = 'Announcements'
-  const announcements = await payload.create({
-    collection: 'categories',
-    data: {
-      title: announcementsTitle,
-      slug: slugify(announcementsTitle),
-      description: 'Milestones, new partnerships and organisational news.',
-    },
-  })
-
-  // ---------------------------------------------------------------------
-  // Programs
-  // ---------------------------------------------------------------------
-  const waterProgram = await payload.create({
-    collection: 'programs',
-    draft: false,
-    data: {
-      title: SENTINEL_TITLE,
-      slug: SENTINEL_SLUG,
-      summary:
-        'Drilling and maintaining boreholes in underserved Ikorodu communities so families no longer walk miles for clean drinking water.',
-      body: richText(
-        'Since 2021, Haven Healing Hands Initiative has worked with local community associations across Ikorodu to identify sites, drill boreholes, and train caretakers to maintain them. Each site is handed over to a community water committee, who report usage and upkeep back to our programmes team every quarter.',
-      ),
-      location: 'Ikorodu, Lagos State',
-      status: 'ongoing',
-      impactStats: [
-        { value: '12', label: 'boreholes drilled' },
-        { value: '8,400', label: 'people with clean water access' },
+  await page('Strategy', 'Our goals and objectives, 2025 to 2030.', [
+    'HHHI operates through four integrated systems, each addressing a unique dimension of human healing and growth. These are the objectives we have set against them for 2025 to 2030.',
+    ...SYSTEMS.flatMap((s) => [s.title, { bullets: s.goals }]),
+    'Global partnerships and advocacy',
+    {
+      bullets: [
+        'Collaborate with UN Women, WHO, and faith-based global bodies to advance gender equality, mental wellness, and community healing.',
+        'Launch an annual international conference on Healing, Hope & Restoration.',
       ],
-      _status: 'published',
     },
-  })
+  ])
 
-  const foodProgramTitle = 'Food Security Outreach in Epe'
-  const foodProgram = await payload.create({
-    collection: 'programs',
-    draft: false,
-    data: {
-      title: foodProgramTitle,
-      slug: slugify(foodProgramTitle),
-      summary:
-        'Monthly food parcel distribution and support for smallholder farming cooperatives in Epe’s riverine communities.',
-      body: richText(
-        'Rising transport costs have made staple foods harder to reach for many households in Epe. Our food security outreach combines monthly distribution days with longer-term support for farming cooperatives, so communities build their own supply over time rather than depending solely on aid.',
-      ),
-      location: 'Epe, Lagos State',
-      status: 'ongoing',
-      impactStats: [
-        { value: '3,200', label: 'households fed monthly' },
-        { value: '15', label: 'farming cooperatives supported' },
-      ],
-      _status: 'published',
-    },
-  })
+  await page('Impact', 'What we have done so far.', [
+    'Haven Healing Hands Initiative was registered in 2025. These are the outreaches and milestones behind that.',
+    { bullets: MILESTONES },
+  ])
 
-  const healthProgramTitle = 'Community Health Outreach in Badagry'
-  const healthProgram = await payload.create({
-    collection: 'programs',
-    draft: false,
-    data: {
-      title: healthProgramTitle,
-      slug: slugify(healthProgramTitle),
-      summary:
-        'Free health screening clinics and volunteer training delivered across Badagry’s coastal communities over eighteen months.',
-      body: richText(
-        'Working with the Lagos State Ministry of Health, we ran a series of free screening clinics for hypertension, malaria and maternal health across Badagry, alongside training for community health volunteers who continue to run basic checks after the programme wound down.',
-      ),
-      location: 'Badagry, Lagos State',
-      status: 'completed',
-      impactStats: [
-        { value: '5,600', label: 'people screened' },
-        { value: '40', label: 'health volunteers trained' },
-      ],
-      _status: 'published',
-    },
-  })
+  await page('Get Involved', 'Five ways to join the work.', [
+    ...GET_INVOLVED.flatMap(([heading, body]) => [heading, body]),
+    'We work alongside local NGOs and faith-based organizations, churches and ministries, community health centres, and private sponsors and business supporters.',
+  ])
 
-  // ---------------------------------------------------------------------
-  // Posts
-  // ---------------------------------------------------------------------
-  const waterPostTitle = 'Twelve Boreholes and Counting: Our Water Project Hits a Milestone'
-  await payload.create({
-    collection: 'posts',
-    draft: false,
-    data: {
-      title: waterPostTitle,
-      slug: slugify(waterPostTitle),
-      excerpt:
-        'Our twelfth borehole went live this month, bringing clean water within reach of over 8,000 people across Ikorodu.',
-      body: richText(
-        'This month, our field team commissioned the twelfth borehole under the Ikorodu clean water programme, in the Agiliti community. Residents who previously walked up to 40 minutes to the nearest working well now have a source within their own compound cluster. The local water committee has already begun its handover training with our technicians.',
-      ),
-      author: executiveDirector.id,
-      category: announcements.id,
-      relatedPrograms: [waterProgram.id],
-      publishedAt: '2026-05-12T09:00:00.000Z',
-      _status: 'published',
-    },
-  })
-
-  const foodPostTitle = 'Inside a Food Distribution Day in Epe'
-  await payload.create({
-    collection: 'posts',
-    draft: false,
-    data: {
-      title: foodPostTitle,
-      slug: slugify(foodPostTitle),
-      excerpt:
-        'A first-hand look at how our volunteers organise a monthly food parcel distribution across Epe’s riverine communities.',
-      body: richText(
-        'By 7am, volunteers are already sorting parcels of rice, beans and garri into household-sized bags at the Epe community hall. Distribution days like this one now reach over 3,200 households a month, coordinated with local cooperative leaders who help us verify need and avoid duplication.',
-      ),
-      author: programmesLead.id,
-      category: fieldNotes.id,
-      relatedPrograms: [foodProgram.id],
-      publishedAt: '2026-06-03T10:30:00.000Z',
-      _status: 'published',
-    },
-  })
-
-  const healthPostTitle = 'What We Learned Running Health Outreach Clinics in Badagry'
-  await payload.create({
-    collection: 'posts',
-    draft: false,
-    data: {
-      title: healthPostTitle,
-      slug: slugify(healthPostTitle),
-      excerpt:
-        'Eighteen months of free screening clinics in Badagry taught us as much about trust as it did about logistics.',
-      body: richText(
-        'When we closed out the Badagry health outreach programme this year, we sat down with the volunteers who kept it running. The biggest lesson was not about equipment or funding, but about trust: uptake tripled once clinics were introduced by community elders rather than by our own staff arriving unannounced.',
-      ),
-      author: programmesLead.id,
-      category: fieldNotes.id,
-      relatedPrograms: [healthProgram.id],
-      publishedAt: '2026-08-20T08:00:00.000Z',
-      _status: 'published',
-    },
-  })
-
-  // ---------------------------------------------------------------------
-  // Events
-  // ---------------------------------------------------------------------
-  const galaTitle = 'Annual Fundraising Gala'
-  await payload.create({
-    collection: 'events',
-    draft: false,
-    data: {
-      title: galaTitle,
-      slug: slugify(galaTitle),
-      summary:
-        'An evening of dinner, live music and storytelling from the field to raise funds for our 2027 programmes.',
-      body: richText(
-        'Join us for Haven Healing Hands Initiative’s annual fundraising gala, where we share stories from the past year’s water, food security and health programmes, and raise funds for the year ahead. Tickets include dinner and a fixed-price raffle in support of the Ikorodu water programme.',
-      ),
-      startsAt: '2026-11-20T18:00:00.000Z',
-      endsAt: '2026-11-20T22:00:00.000Z',
-      venue: 'Eko Hotel & Suites, Victoria Island, Lagos',
-      address: '1415 Adetokunbo Ademola Street, Victoria Island, Lagos, Nigeria',
-      registrationUrl: 'https://helpinghandsinitiative.com/donate',
-      _status: 'published',
-    },
-  })
-
-  const walkTitle = 'World Water Day Community Walk'
-  await payload.create({
-    collection: 'events',
-    draft: false,
-    data: {
-      title: walkTitle,
-      slug: slugify(walkTitle),
-      summary:
-        'A community walk and awareness drive through Ikorodu to mark World Water Day, ending at our newest borehole site.',
-      body: richText(
-        'To mark World Water Day, staff, volunteers and residents walked together through Ikorodu, stopping at three existing borehole sites before gathering at the newest one for a short handover ceremony with the community water committee.',
-      ),
-      startsAt: '2026-03-22T08:00:00.000Z',
-      endsAt: '2026-03-22T11:00:00.000Z',
-      venue: 'Ikorodu Central Square',
-      address: 'Ikorodu Central Square, Ikorodu, Lagos State, Nigeria',
-      _status: 'published',
-    },
-  })
-
-  // ---------------------------------------------------------------------
-  // Pages
-  // ---------------------------------------------------------------------
-  const aboutTitle = 'About Us'
-  await payload.create({
-    collection: 'pages',
-    draft: false,
-    data: {
-      title: aboutTitle,
-      slug: slugify(aboutTitle),
-      layout: [
-        {
-          blockType: 'hero',
-          headline: 'We build lasting community infrastructure, not one-off aid',
-          subtext:
-            'Haven Healing Hands Initiative is a Lagos-based non-profit working on clean water, food security and health access across underserved communities in Nigeria.',
-          ctaLabel: 'See our programmes',
-          ctaUrl: '/programs',
-        },
-        {
-          blockType: 'richText',
-          content: richText(
-            'Founded in 2019, Haven Healing Hands Initiative partners with community associations, local government and health authorities to run programmes that communities can sustain themselves once we step back. We currently run active water and food security programmes in Lagos State, and have completed a health outreach programme in Badagry. Every programme is handed over to a local committee, with our team providing ongoing training and support rather than running services indefinitely.',
-          ),
-        },
-      ],
-      _status: 'published',
-    },
-  })
-
-  const privacyTitle = 'Privacy Policy'
-  await payload.create({
-    collection: 'pages',
-    draft: false,
-    data: {
-      title: privacyTitle,
-      slug: slugify(privacyTitle),
-      layout: [
-        {
-          blockType: 'hero',
-          headline: 'Privacy Policy',
-          subtext: 'How Haven Healing Hands Initiative collects, uses and protects your information.',
-        },
-        {
-          blockType: 'richText',
-          content: richText(
-            'Haven Healing Hands Initiative collects only the information needed to process donations, respond to enquiries and register volunteers. We never sell or share personal information with third parties for marketing purposes. Donation and payment details are processed by our payment partner, Paystack, and are not stored on our own servers. If you have questions about your data, contact us at privacy@helpinghandsinitiative.com.',
-          ),
-        },
-      ],
-      _status: 'published',
-    },
-  })
-
-  // ---------------------------------------------------------------------
-  // Globals
-  // ---------------------------------------------------------------------
   await payload.updateGlobal({
     slug: 'site-settings',
     data: {
       organisationName: 'Haven Healing Hands Initiative',
-      tagline: 'Clean water, food security and health access for underserved Nigerian communities.',
+      tagline: 'Restoring Hope. Rebuilding Lives. Reaching Nations',
       description:
-        'Haven Healing Hands Initiative is a Lagos-based non-profit running clean water, food security and community health programmes across Nigeria.',
-      registrationNumber: 'CAC/IT/NO/98213',
-      email: 'hello@helpinghandsinitiative.com',
-      phone: '+234 803 555 0142',
-      address: {
-        street: '14 Sanya Adepoju Street',
-        city: 'Ikorodu',
-        state: 'Lagos State',
-        country: 'Nigeria',
-      },
-      socials: [
-        { platform: 'facebook', url: 'https://facebook.com/helpinghiveinitiative' },
-        { platform: 'instagram', url: 'https://instagram.com/helpinghiveinitiative' },
-      ],
-      paystackUrl: 'https://paystack.com/pay/helpinghive-initiative',
+        'A faith-based non-profit in Abuja, Nigeria, dedicated to the healing, restoration and empowerment of vulnerable women, children and communities.',
+      email: 'hhhinitiative@gmail.com',
+      address: { city: 'Abuja', country: 'Nigeria' },
+      socials: [{ platform: 'instagram', url: 'https://instagram.com/the_healinghands_initiative' }],
     },
   })
 
   await payload.updateGlobal({
     slug: 'homepage',
     data: {
-      headline: 'Helping communities build what lasts',
-      subtext:
-        'We work alongside communities across Lagos State on clean water, food security and health access, so progress outlives any single programme.',
+      headline: 'Restoring Hope. Rebuilding Lives. Reaching Nations.',
+      subtext: ABOUT_PARAGRAPHS[0],
+      primaryCtaLabel: 'Get involved',
+      primaryCtaUrl: '/get-involved',
+      secondaryCtaLabel: 'Our work',
+      secondaryCtaUrl: '/programs',
       missionHeading: 'Our mission',
-      missionBody: richText(
-        'Haven Healing Hands Initiative exists to close the gap between emergency aid and lasting infrastructure. Every programme we run is designed to be handed over to the community that hosts it, so the impact continues long after our team moves on to the next site.',
-      ),
-      impactStats: [
-        { value: '12', label: 'boreholes drilled' },
-        { value: '3,200', label: 'households fed monthly' },
-        { value: '5,600', label: 'people screened for health' },
-      ],
-      featuredPrograms: [waterProgram.id, foodProgram.id, healthProgram.id],
+      missionBody: richText(ABOUT_PARAGRAPHS.slice(1)),
+      // No impact statistics: the owner has supplied goals for 2025–2030, not
+      // achieved numbers. Presenting aspirations as results would be false.
+      impactStats: [],
+      featuredPrograms: programIds.slice(0, 3),
     },
   })
 
@@ -429,13 +248,12 @@ async function main() {
     slug: 'navigation',
     data: {
       items: [
-        { label: 'Home', url: '/' },
         { label: 'About', url: '/about-us' },
-        { label: 'Programs', url: '/programs' },
-        { label: 'Blog', url: '/blog' },
-        { label: 'Events', url: '/events' },
+        { label: 'Our work', url: '/programs' },
+        { label: 'Strategy', url: '/strategy' },
+        { label: 'Impact', url: '/impact' },
+        { label: 'Get involved', url: '/get-involved' },
         { label: 'Contact', url: '/contact' },
-        { label: 'Donate', url: '/donate' },
       ],
     },
   })
@@ -444,41 +262,31 @@ async function main() {
     slug: 'footer',
     data: {
       blurb:
-        'Haven Healing Hands Initiative is a Lagos-based non-profit working on clean water, food security and health access across underserved communities in Nigeria.',
+        'A faith-based non-profit building safe havens where broken hearts are mended, minds are renewed, and lives are transformed.',
       columns: [
+        {
+          heading: 'Our work',
+          links: SYSTEMS.map((s) => ({ label: s.title, url: `/programs/${slugify(s.title)}` })),
+        },
         {
           heading: 'Organisation',
           links: [
             { label: 'About us', url: '/about-us' },
-            { label: 'Programs', url: '/programs' },
-            { label: 'Events', url: '/events' },
-          ],
-        },
-        {
-          heading: 'Resources',
-          links: [
-            { label: 'Blog', url: '/blog' },
-            { label: 'Privacy Policy', url: '/privacy-policy' },
-            { label: 'Contact', url: '/contact' },
+            { label: 'Strategy', url: '/strategy' },
+            { label: 'Impact', url: '/impact' },
+            { label: 'Get involved', url: '/get-involved' },
           ],
         },
       ],
-      copyright: '© 2026 Haven Healing Hands Initiative. All rights reserved.',
+      copyright: `© ${new Date().getFullYear()} Haven Healing Hands Initiative. All rights reserved.`,
     },
   })
 
-  payload.logger.info('Seeding complete.')
-}
-
-// `payload run` resolves its dynamic `import()` of this file as soon as the
-// module's synchronous body finishes, then immediately calls
-// `process.exit(0)` — so a fire-and-forget `main().then(...)` would let the
-// process exit before any of `main`'s awaited work (which is all of it) had
-// a chance to run. A top-level `await` keeps the import — and therefore the
-// process — alive until seeding genuinely finishes.
-try {
-  await main()
+  payload.logger.info(`seeded ${SYSTEMS.length} programmes, 4 pages, 1 team member`)
+  payload.logger.info(`founder id ${founder.id}; partners, posts and events intentionally empty`)
+  payload.logger.info('seed complete')
+  process.exit(0)
 } catch (error) {
-  console.error('Seed script failed:', error)
-  process.exitCode = 1
+  payload.logger.error(error)
+  process.exit(1)
 }

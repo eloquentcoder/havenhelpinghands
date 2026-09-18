@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: '%s | Haven Healing Hands Initiative',
   },
   description:
-    'Haven Healing Hands Initiative runs clean water, food security and community health programmes across underserved communities in Nigeria.',
+    'A faith-based non-profit in Abuja, Nigeria, dedicated to the healing, restoration and empowerment of vulnerable women, children and communities.',
 }
 
 export default async function RootLayout(props: { children: React.ReactNode }) {

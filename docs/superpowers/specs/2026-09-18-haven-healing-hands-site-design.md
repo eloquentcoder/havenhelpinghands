@@ -5,9 +5,42 @@
 
 ## Purpose
 
-A public website for Haven Healing Hands Initiative, a Nigeria-based NGO. The site must
-establish credibility with grantmakers, partners and press; rank in organic
-search; and let non-technical staff publish content without a developer.
+A public website for Haven Healing Hands Initiative (HHHI), a faith-based
+international non-profit based in Abuja, Nigeria, registered in 2025 and founded
+by Dr. Favour Charles. The site must establish credibility with grantmakers,
+partners and press; rank in organic search; and let non-technical staff publish
+content without a developer.
+
+HHHI works through four integrated systems — the Healing System, the Shelter
+System, the Empowerment System, and the MENtal Rehab. "MENtal" is a deliberate
+wordplay; the capitalisation is preserved everywhere.
+
+**Authoritative content:** `docs/content/hhhi-source-content.md`. Where it
+conflicts with anything here, it wins.
+
+### Content integrity rules
+
+HHHI is a real registered organisation, so placeholder copy on this site reads
+as a factual claim about it. An earlier build seeded invented programmes and an
+invented founder, which only became dangerous once the organisation name was
+corrected — the filler stopped looking like filler.
+
+- **Never invent content.** Where the owner has not supplied something, the field
+  stays empty. Currently unsupplied: CAC registration number, phone, street
+  address, all photography, team members beyond the founder, partner logos.
+- **`partners` stays empty.** The source document's "Collaborators & Partners"
+  are categories — churches, community health centres — not named organisations.
+  They appear as prose on Get Involved.
+- **UN Women, WHO, UNICEF and USAID must never render as current partners.** The
+  source lists them as potential future collaborations and as bodies the
+  2025–2030 goals aspire to work with. Presenting them otherwise is a real
+  reputational risk. SMAP is the only real named partner in the document, via
+  the Momcation retreat.
+- **No invented statistics.** The owner has supplied goals for 2025–2030, not
+  achieved numbers, so the homepage seeds no impact figures.
+- **The faith framing is deliberate**, including "establishing God's kingdom on
+  earth". A softer secular framing was offered to the owner and declined. Do not
+  soften it for funder appeal.
 
 Three goals, delivered in phases: credibility and SEO first, donations second,
 program and volunteer intake third.

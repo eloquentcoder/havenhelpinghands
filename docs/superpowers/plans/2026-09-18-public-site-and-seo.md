@@ -16,6 +16,26 @@
 
 ---
 
+## Content integrity — read before writing any page
+
+`docs/content/hhhi-source-content.md` is the authoritative content. HHHI is a
+real registered organisation; invented copy on this site reads as a factual
+claim about it.
+
+- Never invent content to fill a layout. Unsupplied: registration number, phone,
+  street address, photography, team beyond the founder, partner logos.
+- `partners`, `posts` and `events` are intentionally empty. Index pages for them
+  must render a designed empty state, not break and not be quietly dropped.
+- **UN Women, WHO, UNICEF and USAID must never appear as current partners.**
+  They are aspirations in the source. SMAP is the only real named partner.
+- No invented statistics. The 2025–2030 figures are goals, not achievements, and
+  must be labelled as goals wherever they appear.
+- Preserve "MENtal Rehab" capitalisation exactly.
+- Keep the faith framing as written; the owner declined a secular version.
+
+Routes the seed now expects: `/about-us`, `/strategy`, `/impact`,
+`/get-involved`, `/contact`, plus `/programs` and `/programs/[slug]`.
+
 ## Carried forward from Plan 1
 
 Facts established by building the CMS. Do not rediscover them.
