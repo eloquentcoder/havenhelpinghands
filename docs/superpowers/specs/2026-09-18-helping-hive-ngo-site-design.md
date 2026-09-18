@@ -52,8 +52,25 @@ Rendering: static generation where content is stable, with on-demand
 revalidation fired by a Payload `afterChange` hook. An editor's published change
 goes live within seconds without a full site rebuild.
 
-**Stack:** Next.js 15, Payload 3, PostgreSQL (Neon free tier), Cloudflare R2 for
-media, Tailwind CSS, TypeScript.
+**Stack:** Next.js 15, Payload 3, SQLite via libSQL, Cloudflare R2 for media,
+Tailwind CSS, TypeScript.
+
+### Why SQLite
+
+Payload offers no MySQL adapter — the official list is Postgres, MongoDB, SQLite
+and D1. SQLite was chosen from what is supported because it needs no database
+server at all: development runs against a local file, and production runs against
+Turso, a hosted libSQL service with a free tier.
+
+Both use the same `@payloadcms/db-sqlite` adapter, which ships `@libsql/client`,
+so there is no difference in code between local and production. Turso being
+network-accessible also means the site can deploy to serverless hosting, which a
+plain SQLite file cannot do — a serverless filesystem does not persist.
+
+The limit worth naming: SQLite takes one writer at a time. For a content site
+where a handful of staff publish and everyone else reads, this is irrelevant. If
+the site later needs concurrent high-volume writes, the adapter swaps to Postgres
+without touching a single collection definition.
 
 ### Hosting
 
@@ -62,8 +79,12 @@ commercial use, which a donation-accepting site arguably triggers. Options, in
 order of preference:
 
 1. Apply to the Vercel and DigitalOcean nonprofit credit programs.
-2. Railway or Render at roughly $5/month, database included, fully compliant.
-3. Vercel Hobby + Neon + R2 at zero cost, accepting the terms-of-service grey area.
+2. Railway or Render at roughly $5/month, fully compliant, with a persistent
+   disk so the SQLite file can live on the server and Turso is not needed.
+3. Vercel Hobby + Turso + R2 at zero cost, accepting the terms-of-service grey area.
+
+The database is free on every path: a file on disk where there is a disk, Turso's
+free tier where there is not.
 
 This is a deployment decision, not a blocker on building.
 

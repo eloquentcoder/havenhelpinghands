@@ -6,11 +6,11 @@
 
 **Architecture:** One Next.js 15 App Router application with Payload CMS 3 mounted inside it. Payload owns `/admin` and the database; the public site (Plan 2) will read content through Payload's in-process Local API rather than over HTTP. Content schemas live in `src/collections/`, reusable field definitions in `src/fields/`, and access rules in `src/access/` so they are unit-testable without booting the CMS.
 
-**Tech Stack:** Next.js 15, Payload 3, PostgreSQL, Tailwind CSS 4, TypeScript, Vitest, Docker Compose (local database).
+**Tech Stack:** Next.js 15, Payload 3, SQLite via libSQL, Tailwind CSS 4, TypeScript, Vitest.
 
 **Spec:** `docs/superpowers/specs/2026-09-18-helping-hive-ngo-site-design.md`
 
-**Prerequisite:** Node.js 20 or later, and Docker running locally.
+**Prerequisite:** Node.js 20 or later. No database server is needed — SQLite is a file.
 
 ---
 
@@ -21,6 +21,7 @@ Files created by this plan, and what each is responsible for.
 | File | Responsibility |
 | --- | --- |
 | `src/payload.config.ts` | Wires collections, globals, database and storage together |
+| `helpinghive.db` | The development database (git-ignored) |
 | `src/lib/slug.ts` | Pure string-to-slug conversion |
 | `src/fields/formatSlugHook.ts` | Payload hook that derives a slug from another field |
 | `src/fields/slug.ts` | Reusable slug field definition |
@@ -50,48 +51,14 @@ One file per collection. Collections are the unit that changes independently —
 
 **Files:**
 - Create: entire project skeleton
-- Create: `docker-compose.yml`
 - Create: `.env`, `.env.test`, `.env.example`
+- Modify: `.gitignore`
 
-- [ ] **Step 1: Start a local Postgres**
+There is no database server to install or start. `@payloadcms/db-sqlite` ships
+`@libsql/client`, so a `file:` URL is a local file and a `libsql:` URL is a Turso
+database in production — same adapter, same code, nothing running locally.
 
-Create `docker-compose.yml`:
-
-```yaml
-services:
-  db:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: helpinghive
-      POSTGRES_PASSWORD: helpinghive
-      POSTGRES_DB: helpinghive
-    ports:
-      - '5432:5432'
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-
-volumes:
-  pgdata:
-```
-
-Run:
-
-```bash
-docker compose up -d
-```
-
-Expected: `Container helpinghiveinitiative-db-1  Started`
-
-- [ ] **Step 2: Create the test database**
-
-```bash
-docker compose exec db psql -U helpinghive -d helpinghive -c "CREATE DATABASE helpinghive_test;"
-```
-
-Expected: `CREATE DATABASE`
-
-- [ ] **Step 3: Scaffold Payload + Next.js**
+- [ ] **Step 1: Scaffold Payload + Next.js**
 
 The project directory already contains `docs/` and `.git`, so scaffold in place:
 
@@ -99,8 +66,8 @@ The project directory already contains `docs/` and `.git`, so scaffold in place:
 npx create-payload-app@latest . \
   --name helping-hive \
   --template blank \
-  --db postgres \
-  --db-connection-string "postgres://helpinghive:helpinghive@localhost:5432/helpinghive" \
+  --db sqlite \
+  --db-connection-string "file:./helpinghive.db" \
   --secret "$(openssl rand -hex 32)" \
   --no-git
 ```
@@ -109,21 +76,33 @@ This generates `src/payload.config.ts`, the `src/app/(payload)/` route group hol
 
 Expected: `Launch Application: npm run dev`
 
-- [ ] **Step 4: Add the test environment file**
+- [ ] **Step 2: Confirm the SQLite adapter is wired up**
+
+```bash
+grep -n "sqliteAdapter" src/payload.config.ts
+```
+
+Expected: an import from `@payloadcms/db-sqlite` and a `db: sqliteAdapter({ client: { url: process.env.DATABASE_URI } })` entry. If the generator produced something different, correct it to match.
+
+- [ ] **Step 3: Add the test environment file**
 
 Create `.env.test`:
 
 ```
-DATABASE_URI=postgres://helpinghive:helpinghive@localhost:5432/helpinghive_test
+DATABASE_URI=file:./helpinghive-test.db
 PAYLOAD_SECRET=test-secret-not-used-in-production
 ```
 
 Create `.env.example` (committed; `.env` and `.env.test` are not):
 
 ```
-DATABASE_URI=postgres://helpinghive:helpinghive@localhost:5432/helpinghive
+DATABASE_URI=file:./helpinghive.db
 PAYLOAD_SECRET=generate-with-openssl-rand-hex-32
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+# Production only — a Turso libSQL database.
+# DATABASE_URI=libsql://<name>.turso.io
+# DATABASE_AUTH_TOKEN=
 
 # Cloudflare R2 (Task 14)
 R2_BUCKET=
@@ -133,16 +112,38 @@ R2_ENDPOINT=
 R2_PUBLIC_URL=
 ```
 
-- [ ] **Step 5: Confirm `.env` files are ignored**
+- [ ] **Step 4: Ignore the database files and confirm env files are ignored**
 
-```bash
-grep -E '^\.env' .gitignore
+Append to `.gitignore`:
+
+```
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.env.test
 ```
 
-Expected: output includes `.env`. If `.env.test` is not covered, append it:
+Then verify:
 
 ```bash
-echo ".env.test" >> .gitignore
+grep -E '^\.env|^\*\.db' .gitignore
+```
+
+Expected: output includes `.env`, `.env.test` and `*.db`. A committed database file would leak content and cause constant merge conflicts.
+
+- [ ] **Step 5: Support the Turso auth token**
+
+A local file needs no credentials, but Turso does. In `src/payload.config.ts`, extend the adapter config so the token is passed when present:
+
+```ts
+db: sqliteAdapter({
+  client: {
+    url: process.env.DATABASE_URI || '',
+    // Ignored for local `file:` URLs; required for a remote Turso database.
+    authToken: process.env.DATABASE_AUTH_TOKEN,
+  },
+}),
 ```
 
 - [ ] **Step 6: Verify the admin panel boots**
@@ -157,7 +158,7 @@ Open `http://localhost:3000/admin`. Expected: the "Create first user" screen. Cr
 
 ```bash
 git add -A
-git commit -m "chore: scaffold Next.js 15 + Payload 3 with local Postgres"
+git commit -m "chore: scaffold Next.js 15 + Payload 3 with SQLite"
 ```
 
 ---
@@ -623,14 +624,19 @@ export const Users: CollectionConfig = {
 
 The account created in Task 1 predates the role field and defaults to `editor`.
 
+First run `npm run dev` once so Payload pushes the new `role` column to the database, then stop it and run:
+
 ```bash
-docker compose exec db psql -U helpinghive -d helpinghive \
-  -c "UPDATE users SET role = 'admin';"
+sqlite3 helpinghive.db "UPDATE users SET role = 'admin';"
 ```
 
-Expected: `UPDATE 1`
+Verify:
 
-Note: run `npm run dev` once before this so Payload pushes the new `role` column to the database.
+```bash
+sqlite3 helpinghive.db "SELECT email, role FROM users;"
+```
+
+Expected: your email paired with `admin`. `sqlite3` ships with macOS; if it is missing, `brew install sqlite`.
 
 - [ ] **Step 7: Commit**
 
@@ -1026,7 +1032,7 @@ describe('programs collection', () => {
 npm run test:int
 ```
 
-Expected: PASS — `2 passed`. If it fails with a connection error, confirm `docker compose ps` shows the database running and that `helpinghive_test` exists. If the second test fails because a draft *was* returned, check that `publishedOrSignedIn` is wired to `access.read` in `src/collections/Programs.ts`.
+Expected: PASS — `2 passed`. The test database file is created automatically on first run; delete `helpinghive-test.db` to reset it. If the second test fails because a draft *was* returned, check that `publishedOrSignedIn` is wired to `access.read` in `src/collections/Programs.ts`.
 
 - [ ] **Step 6: Commit**
 
