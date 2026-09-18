@@ -77,6 +77,7 @@ export interface Config {
     events: Event;
     redirects: Redirect;
     submissions: Submission;
+    pages: Page;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -94,6 +95,7 @@ export interface Config {
     events: EventsSelect<false> | EventsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     submissions: SubmissionsSelect<false> | SubmissionsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -543,6 +545,111 @@ export interface Submission {
   createdAt: string;
 }
 /**
+ * Standalone pages such as About, Impact or Privacy.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  /**
+   * Build the page by adding and reordering sections.
+   */
+  layout: (
+    | {
+        headline: string;
+        subtext?: string | null;
+        image?: (number | null) | Media;
+        /**
+         * Button text, for example "Donate now".
+         */
+        ctaLabel?: string | null;
+        ctaUrl?: string | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'hero';
+      }
+    | {
+        content: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'richText';
+      }
+    | {
+        heading?: string | null;
+        items?:
+          | {
+              /**
+               * For example "1,200"
+               */
+              value: string;
+              /**
+               * For example "meals served"
+               */
+              label: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'stats';
+      }
+    | {
+        heading: string;
+        body?: string | null;
+        buttonLabel: string;
+        buttonUrl: string;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'callToAction';
+      }
+  )[];
+  seo?: {
+    /**
+     * Shown as the headline in Google. Aim for under 60 characters. Defaults to the title.
+     */
+    metaTitle?: string | null;
+    /**
+     * The grey text under the headline in Google. Aim for 150-160 characters. Defaults to the summary.
+     */
+    metaDescription?: string | null;
+    /**
+     * The picture shown when this page is shared on WhatsApp, Facebook or X. Defaults to the hero image.
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Only fill this in if this content was first published elsewhere and that version should rank instead.
+     */
+    canonicalUrl?: string | null;
+    /**
+     * Hide this page from Google. The page stays reachable by anyone with the link.
+     */
+    noindex?: boolean | null;
+  };
+  /**
+   * The web address for this page. Leave blank to generate it from the title. If another entry already uses the same address, type a different one here.
+   */
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -605,6 +712,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'submissions';
         value: number | Submission;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -893,6 +1004,72 @@ export interface SubmissionsSelect<T extends boolean = true> {
   handled?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  layout?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              headline?: T;
+              subtext?: T;
+              image?: T;
+              ctaLabel?: T;
+              ctaUrl?: T;
+              id?: T;
+              blockName?: T;
+            };
+        richText?:
+          | T
+          | {
+              content?: T;
+              id?: T;
+              blockName?: T;
+            };
+        stats?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    value?: T;
+                    label?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        callToAction?:
+          | T
+          | {
+              heading?: T;
+              body?: T;
+              buttonLabel?: T;
+              buttonUrl?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        canonicalUrl?: T;
+        noindex?: T;
+      };
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

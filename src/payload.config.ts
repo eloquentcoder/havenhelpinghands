@@ -15,6 +15,7 @@ import { Posts } from './collections/Posts'
 import { Events } from './collections/Events'
 import { Redirects } from './collections/Redirects'
 import { Submissions } from './collections/Submissions'
+import { Pages } from './collections/Pages'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -37,6 +38,7 @@ export default buildConfig({
     Events,
     Redirects,
     Submissions,
+    Pages,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
