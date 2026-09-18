@@ -71,6 +71,17 @@ which Payload enforces by *silently discarding* the value rather than rejecting
 the write, so the regression test in `tests/int/access.int.spec.ts` asserts on the
 stored role rather than on whether the call threw.
 
+**A custom `validate` replaces Payload's `required` check.** Confirmed in Task 11
+by reading `payload/dist/fields/config/sanitize.js`: the default validator is only
+installed `if (typeof field.validate === 'undefined')`. Supplying any custom
+validator silently disables `required: true`. The reserved-slug validator
+therefore calls `validations.text(value, options)` first and only adds its own
+rule if that passes. Any future custom validator must do the same.
+
+**The reserved-slug list is hand-maintained.** `RESERVED` in `src/fields/slug.ts`
+lists current top-level routes. Plan 2 must add to it whenever it adds a new
+top-level route, or a Page could shadow that route.
+
 **Slug length is unbounded for now.** A 300-character title yields a
 300-character URL. Not worth a `maxLength` that would block a save; revisit with
 truncation in `slugify` if it becomes a real problem.
