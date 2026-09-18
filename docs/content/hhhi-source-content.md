@@ -152,3 +152,33 @@ To strengthen and expand operations, HHHI currently seeks:
 - Photographs of any kind.
 - Named team members beyond the founder.
 - Partner logos.
+
+---
+
+## Owner decision: retitle the Current Ask for visitors
+
+"Current Ask / Needs Assessment (Q4 2025 – 2026)" is internal prospectus
+language. The owner has decided it is retitled for visitors on `/get-involved`.
+The five asks are unchanged in substance — only the framing moves from "what
+HHHI needs" to "what you can do".
+
+- **H1 and nav label:** Get Involved
+- **Standfirst:** Five ways to join the work.
+- **Page title:** Get Involved (the layout template appends the org name)
+- **Meta description:** Fund a programme, volunteer your profession, or partner
+  with us. Five ways to support healing, shelter and empowerment work in Abuja,
+  Nigeria.
+
+Section headings, in order:
+
+| Source ask | Visitor-facing heading | Body |
+| --- | --- | --- |
+| Funding, grants and sponsorships | Fund a programme | Grants, sponsorships and one-off gifts supporting outreaches, community development and the safe haven shelters. |
+| Volunteers and professionals | Volunteer your profession | Medical, mental health, education and logistics. |
+| Partnerships | Partner with us | Local and international NGOs, corporate sponsors, churches and ministries. |
+| Media and storytelling support | Tell the story | Photographers, writers and filmmakers for impact documentation. |
+| Training and capacity-building | Train our team | Capacity-building for staff and community leaders. |
+
+The quarter is dropped from the heading deliberately. A date window in an H1
+dates the page the moment it closes, and nothing in the build would catch it.
+If the window needs stating, it belongs in body copy an editor can revise.
