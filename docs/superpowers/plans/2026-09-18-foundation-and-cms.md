@@ -75,6 +75,34 @@ stored role rather than on whether the call threw.
 300-character URL. Not worth a `maxLength` that would block a save; revisit with
 truncation in `slugify` if it becomes a real problem.
 
+## Known issue: intermittent SQLite schema-push race
+
+Observed twice, by separate implementers, during Tasks 7 and 8:
+
+```
+SQLITE_ERROR: index ... already exists
+```
+
+It surfaces during Payload's dev schema push, fails one integration test file,
+and passes on an immediate re-run. It could not be reproduced in five deliberate
+attempts against a fresh database, so it was NOT fixed — churning test
+infrastructure to chase an unreproducible fault risks more than the fault costs.
+
+**Diagnosis, if it returns.** Every integration test file boots its own Payload
+instance, and each one pushes the schema — five "Pulling schema from database"
+cycles per run. That is both wasted work and the likely race.
+
+**Proposed fix.** Push the schema exactly once, then disable it for the workers:
+
+1. Add `PAYLOAD_PUSH=false` to `.env.test`.
+2. In `src/payload.config.ts`, set `push: process.env.PAYLOAD_PUSH !== 'false'`
+   on the SQLite adapter.
+3. Add a `globalSetup` to `vitest.config.mts` that loads `.env.test`, forces
+   `PAYLOAD_PUSH=true` in its own process, and boots Payload once.
+
+Worker processes then read `push: false` and skip the race entirely, and the
+suite gets faster. Do this if CI shows the failure, not before.
+
 ## File Structure
 
 Files created by this plan, and what each is responsible for.
