@@ -76,6 +76,7 @@ export interface Config {
     posts: Post;
     events: Event;
     redirects: Redirect;
+    submissions: Submission;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -92,6 +93,7 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
+    submissions: SubmissionsSelect<false> | SubmissionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -520,6 +522,27 @@ export interface Redirect {
   createdAt: string;
 }
 /**
+ * Messages sent through the contact and volunteer forms.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "submissions".
+ */
+export interface Submission {
+  id: number;
+  formType: 'contact' | 'volunteer';
+  name: string;
+  email: string;
+  phone?: string | null;
+  subject?: string | null;
+  message: string;
+  /**
+   * Tick once someone has replied.
+   */
+  handled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -578,6 +601,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'redirects';
         value: number | Redirect;
+      } | null)
+    | ({
+        relationTo: 'submissions';
+        value: number | Submission;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -849,6 +876,21 @@ export interface RedirectsSelect<T extends boolean = true> {
   from?: T;
   to?: T;
   permanent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "submissions_select".
+ */
+export interface SubmissionsSelect<T extends boolean = true> {
+  formType?: T;
+  name?: T;
+  email?: T;
+  phone?: T;
+  subject?: T;
+  message?: T;
+  handled?: T;
   updatedAt?: T;
   createdAt?: T;
 }
