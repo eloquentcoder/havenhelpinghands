@@ -21,7 +21,7 @@ so. Before writing App Router code — especially the metadata, sitemap and
 **What the generator already gave us** (discovered during Task 1; later tasks
 build on these rather than replacing them):
 
-- `vitest.config.mts` — integration tests, `tests/int/**/*.int.spec.ts`, jsdom
+- `vitest.config.mts` — integration tests, `tests/int/**/*.int.spec.ts` (node env; the generator's jsdom default breaks uploads)
 - `playwright.config.ts` + `tests/e2e/` + `tests/helpers/` — e2e scaffolding
 - `src/collections/Users.ts` and `src/collections/Media.ts` — stub collections
 - `tsconfig.json` paths for both `@/*` and `@payload-config`
@@ -286,9 +286,15 @@ git commit -m "chore: add Tailwind CSS 4"
 
 Vitest, `vite-tsconfig-paths` and `dotenv` are already installed, and
 `vitest.config.mts` already exists for integration tests. Do not touch it — add a
-second config for unit tests instead. They need different settings: unit tests
-want a plain `node` environment and no database, integration tests want jsdom and
-a real Payload instance.
+second config for unit tests instead. Unit tests need a plain `node` environment
+and no database.
+
+Correction made during Task 6: the generator set the integration config to
+`jsdom`, and this plan originally repeated that as if it were deliberate. It is
+wrong. Under jsdom, Node's `Buffer` and the global `Uint8Array` live in separate
+realms, so the `file-type` package's `instanceof` check throws on every upload
+and Payload reports "Could not read uploaded file for type detection." No
+integration test touches the DOM. The integration config now uses `node`.
 
 - [ ] **Step 1: Add the unit test config**
 
