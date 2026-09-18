@@ -4,13 +4,31 @@
 
 **Goal:** Stand up the Next.js + Payload application with every content schema in place, so Helping Hive staff can log in and enter real content before a single public page exists.
 
-**Architecture:** One Next.js 15 App Router application with Payload CMS 3 mounted inside it. Payload owns `/admin` and the database; the public site (Plan 2) will read content through Payload's in-process Local API rather than over HTTP. Content schemas live in `src/collections/`, reusable field definitions in `src/fields/`, and access rules in `src/access/` so they are unit-testable without booting the CMS.
+**Architecture:** One Next.js 16 App Router application with Payload CMS 3 mounted inside it. Payload owns `/admin` and the database; the public site (Plan 2) will read content through Payload's in-process Local API rather than over HTTP. Content schemas live in `src/collections/`, reusable field definitions in `src/fields/`, and access rules in `src/access/` so they are unit-testable without booting the CMS.
 
-**Tech Stack:** Next.js 15, Payload 3, SQLite via libSQL, Tailwind CSS 4, TypeScript, Vitest.
+**Tech Stack:** Next.js 16.3.3, Payload 3.89, SQLite via libSQL, Tailwind CSS 4, TypeScript, Vitest, Playwright.
+
+**Next.js 16, not 15.** `create-payload-app` installed Next 16.3.3. Next 16 makes
+breaking changes to App Router APIs, and `next dev` writes an `AGENTS.md` saying
+so. Before writing App Router code — especially the metadata, sitemap and
+`opengraph-image` work in Plan 2 — read the relevant guide in
+`node_modules/next/dist/docs/` rather than relying on Next 15 habits.
 
 **Spec:** `docs/superpowers/specs/2026-09-18-helping-hive-ngo-site-design.md`
 
 **Prerequisite:** Node.js 20 or later. No database server is needed — SQLite is a file.
+
+**What the generator already gave us** (discovered during Task 1; later tasks
+build on these rather than replacing them):
+
+- `vitest.config.mts` — integration tests, `tests/int/**/*.int.spec.ts`, jsdom
+- `playwright.config.ts` + `tests/e2e/` + `tests/helpers/` — e2e scaffolding
+- `src/collections/Users.ts` and `src/collections/Media.ts` — stub collections
+- `tsconfig.json` paths for both `@/*` and `@payload-config`
+- Scripts: `dev`, `build`, `lint`, `test:int`, `test:e2e`, `generate:types`
+
+Note the convention: integration tests are named `*.int.spec.ts`, not
+`*.int.test.ts`. Follow it.
 
 ---
 
@@ -41,7 +59,8 @@ Files created by this plan, and what each is responsible for.
 | `src/blocks/*.ts` | Page-builder blocks |
 | `src/globals/*.ts` | Site Settings, Navigation, Footer, Homepage |
 | `tests/unit/*.test.ts` | Unit tests for pure logic |
-| `tests/int/*.int.test.ts` | Integration tests against a real database |
+| `tests/int/*.int.spec.ts` | Integration tests against a real database |
+| `vitest.unit.config.mts` | Unit test config (integration config already exists) |
 
 One file per collection. Collections are the unit that changes independently — an editor asking for a new field on Events should touch exactly one file.
 
@@ -229,20 +248,20 @@ git commit -m "chore: add Tailwind CSS 4"
 ## Task 3: Set up Vitest and the slug utility
 
 **Files:**
-- Create: `vitest.config.mts`
+- Create: `vitest.unit.config.mts`
 - Create: `tests/unit/slug.test.ts`
 - Create: `src/lib/slug.ts`
 - Modify: `package.json`
 
-- [ ] **Step 1: Install test dependencies**
+Vitest, `vite-tsconfig-paths` and `dotenv` are already installed, and
+`vitest.config.mts` already exists for integration tests. Do not touch it — add a
+second config for unit tests instead. They need different settings: unit tests
+want a plain `node` environment and no database, integration tests want jsdom and
+a real Payload instance.
 
-```bash
-npm install -D vitest vite-tsconfig-paths dotenv
-```
+- [ ] **Step 1: Add the unit test config**
 
-- [ ] **Step 2: Configure Vitest**
-
-Create `vitest.config.mts`:
+Create `vitest.unit.config.mts`:
 
 ```ts
 import { defineConfig } from 'vitest/config'
@@ -257,11 +276,15 @@ export default defineConfig({
 })
 ```
 
-Add to the `scripts` block in `package.json`:
+Add to the `scripts` block in `package.json`, and extend `test` to run both suites:
 
 ```json
-"test": "vitest run --config vitest.config.mts"
+"test:unit": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.unit.config.mts",
+"test": "npm run test:unit && npm run test:int"
 ```
+
+`test:e2e` stays available on its own; it needs a running server, so it is not
+part of the default `test` run.
 
 - [ ] **Step 3: Write the failing test**
 
@@ -301,7 +324,7 @@ describe('slugify', () => {
 - [ ] **Step 4: Run the test to verify it fails**
 
 ```bash
-npm test
+npm run test:unit
 ```
 
 Expected: FAIL — `Failed to resolve import "@/lib/slug"`
@@ -332,7 +355,7 @@ export function slugify(input: string): string {
 - [ ] **Step 6: Run the test to verify it passes**
 
 ```bash
-npm test
+npm run test:unit
 ```
 
 Expected: PASS — `6 passed`
@@ -391,7 +414,7 @@ describe('formatSlugHook', () => {
 - [ ] **Step 2: Run the test to verify it fails**
 
 ```bash
-npm test
+npm run test:unit
 ```
 
 Expected: FAIL — `Failed to resolve import "@/fields/formatSlugHook"`
@@ -428,7 +451,7 @@ export const formatSlugHook =
 - [ ] **Step 4: Run the test to verify it passes**
 
 ```bash
-npm test
+npm run test:unit
 ```
 
 Expected: PASS — `10 passed`
@@ -533,7 +556,7 @@ describe('publishedOrSignedIn', () => {
 - [ ] **Step 2: Run the test to verify it fails**
 
 ```bash
-npm test
+npm run test:unit
 ```
 
 Expected: FAIL — `Failed to resolve import "@/access/roles"`
@@ -566,7 +589,7 @@ export const anyone: Access = () => true
 - [ ] **Step 4: Run the test to verify it passes**
 
 ```bash
-npm test
+npm run test:unit
 ```
 
 Expected: PASS — `18 passed`
@@ -651,7 +674,7 @@ git commit -m "feat: add admin and editor roles with access control"
 
 **Files:**
 - Create: `src/fields/seo.ts`
-- Create: `src/collections/Media.ts`
+- Modify: `src/collections/Media.ts` (a stub already exists from the generator)
 - Modify: `src/payload.config.ts`
 
 - [ ] **Step 1: Create the shared SEO field group**
@@ -719,9 +742,9 @@ export const seoField: Field = {
 }
 ```
 
-- [ ] **Step 2: Create the Media collection**
+- [ ] **Step 2: Replace the Media collection**
 
-Create `src/collections/Media.ts`:
+The generator created a stub at `src/collections/Media.ts`. Replace its contents with:
 
 ```ts
 import type { CollectionConfig } from 'payload'
@@ -805,9 +828,7 @@ git commit -m "feat: add SEO field group and Media collection"
 
 **Files:**
 - Create: `src/collections/Programs.ts`
-- Create: `vitest.int.config.mts`
-- Create: `tests/int/setup.ts`
-- Create: `tests/int/programs.int.test.ts`
+- Create: `tests/int/programs.int.spec.ts`
 - Modify: `src/payload.config.ts`, `package.json`
 
 - [ ] **Step 1: Write the collection**
@@ -936,47 +957,47 @@ import { Programs } from '@/collections/Programs'
 collections: [Users, Media, Programs],
 ```
 
-- [ ] **Step 3: Configure integration tests**
+- [ ] **Step 3: Point integration tests at the test database**
 
-Create `tests/int/setup.ts`:
+`vitest.config.mts` and the `test:int` script already exist. The problem is
+`vitest.setup.ts`, which currently does a bare `import 'dotenv/config'` — that
+loads `.env`, so integration tests run against the **development** database and
+would corrupt real content.
+
+Replace `vitest.setup.ts` with:
 
 ```ts
 import { config } from 'dotenv'
 
 // Point Payload at the throwaway test database, never the development one.
+// `override` matters: dotenv will not replace an already-set variable without it.
 config({ path: '.env.test', override: true })
 ```
 
-Create `vitest.int.config.mts`:
+Then give integration tests room to boot Payload. In `vitest.config.mts`, add to
+the `test` block, leaving `include` and `environment` as they are:
 
 ```ts
-import { defineConfig } from 'vitest/config'
-import tsconfigPaths from 'vite-tsconfig-paths'
-
-export default defineConfig({
-  plugins: [tsconfigPaths()],
-  test: {
-    environment: 'node',
-    include: ['tests/int/**/*.int.test.ts'],
-    setupFiles: ['./tests/int/setup.ts'],
     testTimeout: 60_000,
     hookTimeout: 60_000,
     fileParallelism: false,
-  },
-})
 ```
 
-Add to `scripts` in `package.json`:
+- [ ] **Step 3b: Verify the redirection worked**
 
-```json
-"test:int": "vitest run --config vitest.int.config.mts"
+```bash
+npm run test:int && ls -la helpinghive-test.db
 ```
+
+Expected: the existing `api.int.spec.ts` still passes AND `helpinghive-test.db`
+now exists. If it does not, the tests are still hitting `.env` — stop and fix
+that before continuing, or Task 15's seed data will end up in the test database.
 
 - [ ] **Step 4: Write the integration test**
 
 This one is written after the collection rather than before it. The behaviour under test — slug generation and draft access — lives in Payload's own machinery reacting to configuration, so there is no meaningful red state to observe first. The unit tests in Tasks 3 to 5 cover the logic we actually wrote; this test proves the configuration wires it up correctly.
 
-Create `tests/int/programs.int.test.ts`:
+Create `tests/int/programs.int.spec.ts`:
 
 ```ts
 import { beforeAll, describe, expect, it } from 'vitest'
@@ -986,7 +1007,8 @@ import config from '@payload-config'
 let payload: Payload
 
 beforeAll(async () => {
-  payload = await getPayload({ config })
+  // The config is a promise; await it, matching tests/int/api.int.spec.ts.
+  payload = await getPayload({ config: await config })
 })
 
 describe('programs collection', () => {
@@ -1032,7 +1054,7 @@ describe('programs collection', () => {
 npm run test:int
 ```
 
-Expected: PASS — `2 passed`. The test database file is created automatically on first run; delete `helpinghive-test.db` to reset it. If the second test fails because a draft *was* returned, check that `publishedOrSignedIn` is wired to `access.read` in `src/collections/Programs.ts`.
+Expected: PASS — `3 passed` across two files (the generator's `api.int.spec.ts` plus these two). The test database file is created automatically on first run; delete `helpinghive-test.db` to reset it. If the second test fails because a draft *was* returned, check that `publishedOrSignedIn` is wired to `access.read` in `src/collections/Programs.ts`.
 
 - [ ] **Step 6: Commit**
 
@@ -2080,10 +2102,10 @@ Upload an image in the admin panel. Expected: the image preview loads, and its U
 - [ ] **Step 6: Confirm tests still pass without credentials**
 
 ```bash
-npm test && npm run test:int
+npm test
 ```
 
-Expected: PASS for both. `.env.test` has no R2 variables, so the plugin stays disabled.
+Expected: PASS for both suites. `.env.test` has no R2 variables, so the plugin stays disabled.
 
 - [ ] **Step 7: Commit**
 
@@ -2251,10 +2273,10 @@ Expected: Programs contains a published "Clean Water Project" with slug `clean-w
 - [ ] **Step 5: Run the full test suite**
 
 ```bash
-npm test && npm run test:int
+npm test
 ```
 
-Expected: PASS for both, `18 passed` unit and `2 passed` integration.
+Expected: PASS — `18 passed` unit, then `3 passed` integration.
 
 - [ ] **Step 6: Verify the build**
 
@@ -2280,7 +2302,7 @@ git commit -m "feat: add seed script with example content"
 - Drafts are invisible to anonymous readers.
 - Images upload to R2 and cannot be saved without alt text.
 - Editors cannot promote themselves to admin.
-- `npm test`, `npm run test:int` and `npm run build` all pass.
+- `npm test` (unit + integration) and `npm run build` both pass.
 
 ## Next
 

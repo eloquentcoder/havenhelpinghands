@@ -33,7 +33,7 @@ These shaped every decision below.
 
 ## Architecture
 
-A single Next.js 15 App Router application with Payload CMS 3 mounted inside it.
+A single Next.js 16 App Router application with Payload CMS 3 mounted inside it.
 
 ```
 app/
@@ -52,7 +52,7 @@ Rendering: static generation where content is stable, with on-demand
 revalidation fired by a Payload `afterChange` hook. An editor's published change
 goes live within seconds without a full site rebuild.
 
-**Stack:** Next.js 15, Payload 3, SQLite via libSQL, Cloudflare R2 for media,
+**Stack:** Next.js 16, Payload 3, SQLite via libSQL, Cloudflare R2 for media,
 Tailwind CSS, TypeScript.
 
 ### Why SQLite
