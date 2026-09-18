@@ -72,6 +72,7 @@ export interface Config {
     programs: Program;
     team: Team;
     partners: Partner;
+    categories: Category;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -84,6 +85,7 @@ export interface Config {
     programs: ProgramsSelect<false> | ProgramsSelect<true>;
     team: TeamSelect<false> | TeamSelect<true>;
     partners: PartnersSelect<false> | PartnersSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -335,6 +337,21 @@ export interface Partner {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  title: string;
+  description?: string | null;
+  /**
+   * The web address for this page. Leave blank to generate it from the title. If another entry already uses the same address, type a different one here.
+   */
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -376,6 +393,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'partners';
         value: number | Partner;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -564,6 +585,17 @@ export interface PartnersSelect<T extends boolean = true> {
   logo?: T;
   url?: T;
   order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  slug?: T;
   updatedAt?: T;
   createdAt?: T;
 }
