@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    programs: Program;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +79,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    programs: ProgramsSelect<false> | ProgramsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -200,6 +202,92 @@ export interface Media {
   };
 }
 /**
+ * The initiatives Helping Hive runs. Each one gets its own page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "programs".
+ */
+export interface Program {
+  id: number;
+  title: string;
+  /**
+   * One or two sentences, shown on the programs listing and used as the search description.
+   */
+  summary: string;
+  /**
+   * The large image at the top of the program page.
+   */
+  heroImage?: (number | null) | Media;
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  gallery?:
+    | {
+        image: number | Media;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Where this runs, for example "Ikorodu, Lagos State". Used for local search.
+   */
+  location?: string | null;
+  status: 'ongoing' | 'completed';
+  impactStats?:
+    | {
+        /**
+         * For example "1,200"
+         */
+        value: string;
+        /**
+         * For example "meals served"
+         */
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  seo?: {
+    /**
+     * Shown as the headline in Google. Aim for under 60 characters. Defaults to the title.
+     */
+    metaTitle?: string | null;
+    /**
+     * The grey text under the headline in Google. Aim for 150-160 characters. Defaults to the summary.
+     */
+    metaDescription?: string | null;
+    /**
+     * The picture shown when this page is shared on WhatsApp, Facebook or X. Defaults to the hero image.
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Only fill this in if this content was first published elsewhere and that version should rank instead.
+     */
+    canonicalUrl?: string | null;
+    /**
+     * Hide this page from Google. The page stays reachable by anyone with the link.
+     */
+    noindex?: boolean | null;
+  };
+  /**
+   * The web address for this page. Leave blank to generate it from the title. If another entry already uses the same address, type a different one here.
+   */
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
@@ -230,6 +318,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'programs';
+        value: number | Program;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -349,6 +441,44 @@ export interface MediaSelect<T extends boolean = true> {
               filename?: T;
             };
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "programs_select".
+ */
+export interface ProgramsSelect<T extends boolean = true> {
+  title?: T;
+  summary?: T;
+  heroImage?: T;
+  body?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  location?: T;
+  status?: T;
+  impactStats?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        canonicalUrl?: T;
+        noindex?: T;
+      };
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
