@@ -34,7 +34,7 @@ beforeAll(async () => {
 
 describe('pages collection', () => {
   it('saves a page built from multiple block types and reads them back', async () => {
-    const title = `About Helping Hive ${unique()}`
+    const title = `About Helping Hands ${unique()}`
 
     const created = await payload.create({
       collection: 'pages',

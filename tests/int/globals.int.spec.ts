@@ -16,7 +16,7 @@ beforeAll(async () => {
 describe('globals are reachable with their defaults', () => {
   it('site-settings returns organisationName default before ever being written', async () => {
     const doc = await payload.findGlobal({ slug: 'site-settings' })
-    expect(doc.organisationName).toBe('Helping Hive Initiative')
+    expect(doc.organisationName).toBe('Helping Hands Initiative')
   })
 
   it('navigation is reachable', async () => {

@@ -70,10 +70,10 @@ async function main() {
       name: 'Adaeze Chukwu',
       role: 'Executive Director',
       group: 'staff',
-      bio: 'Adaeze founded Helping Hive Initiative in 2019 after a decade working in public health across Lagos and Ogun States. She leads strategy, partnerships and fundraising.',
+      bio: 'Adaeze founded Helping Hands Initiative in 2019 after a decade working in public health across Lagos and Ogun States. She leads strategy, partnerships and fundraising.',
       socials: {
         linkedin: 'https://linkedin.com/in/adaeze-chukwu',
-        email: 'adaeze@helpinghiveinitiative.org',
+        email: 'adaeze@helpinghandsinitiative.com',
       },
       order: 0,
     },
@@ -85,10 +85,10 @@ async function main() {
       name: 'Ifeoluwa Bankole',
       role: 'Programmes Lead',
       group: 'staff',
-      bio: 'Ifeoluwa designs and runs Helping Hive’s field programmes, from borehole drilling to food distribution days, and coordinates our network of community volunteers.',
+      bio: 'Ifeoluwa designs and runs Helping Hands’s field programmes, from borehole drilling to food distribution days, and coordinates our network of community volunteers.',
       socials: {
         twitter: 'https://twitter.com/ifeoluwab',
-        email: 'ifeoluwa@helpinghiveinitiative.org',
+        email: 'ifeoluwa@helpinghandsinitiative.com',
       },
       order: 1,
     },
@@ -162,7 +162,7 @@ async function main() {
       summary:
         'Drilling and maintaining boreholes in underserved Ikorodu communities so families no longer walk miles for clean drinking water.',
       body: richText(
-        'Since 2021, Helping Hive Initiative has worked with local community associations across Ikorodu to identify sites, drill boreholes, and train caretakers to maintain them. Each site is handed over to a community water committee, who report usage and upkeep back to our programmes team every quarter.',
+        'Since 2021, Helping Hands Initiative has worked with local community associations across Ikorodu to identify sites, drill boreholes, and train caretakers to maintain them. Each site is handed over to a community water committee, who report usage and upkeep back to our programmes team every quarter.',
       ),
       location: 'Ikorodu, Lagos State',
       status: 'ongoing',
@@ -294,13 +294,13 @@ async function main() {
       summary:
         'An evening of dinner, live music and storytelling from the field to raise funds for our 2027 programmes.',
       body: richText(
-        'Join us for Helping Hive Initiative’s annual fundraising gala, where we share stories from the past year’s water, food security and health programmes, and raise funds for the year ahead. Tickets include dinner and a fixed-price raffle in support of the Ikorodu water programme.',
+        'Join us for Helping Hands Initiative’s annual fundraising gala, where we share stories from the past year’s water, food security and health programmes, and raise funds for the year ahead. Tickets include dinner and a fixed-price raffle in support of the Ikorodu water programme.',
       ),
       startsAt: '2026-11-20T18:00:00.000Z',
       endsAt: '2026-11-20T22:00:00.000Z',
       venue: 'Eko Hotel & Suites, Victoria Island, Lagos',
       address: '1415 Adetokunbo Ademola Street, Victoria Island, Lagos, Nigeria',
-      registrationUrl: 'https://helpinghiveinitiative.org/donate',
+      registrationUrl: 'https://helpinghandsinitiative.com/donate',
       _status: 'published',
     },
   })
@@ -340,14 +340,14 @@ async function main() {
           blockType: 'hero',
           headline: 'We build lasting community infrastructure, not one-off aid',
           subtext:
-            'Helping Hive Initiative is a Lagos-based non-profit working on clean water, food security and health access across underserved communities in Nigeria.',
+            'Helping Hands Initiative is a Lagos-based non-profit working on clean water, food security and health access across underserved communities in Nigeria.',
           ctaLabel: 'See our programmes',
           ctaUrl: '/programs',
         },
         {
           blockType: 'richText',
           content: richText(
-            'Founded in 2019, Helping Hive Initiative partners with community associations, local government and health authorities to run programmes that communities can sustain themselves once we step back. We currently run active water and food security programmes in Lagos State, and have completed a health outreach programme in Badagry. Every programme is handed over to a local committee, with our team providing ongoing training and support rather than running services indefinitely.',
+            'Founded in 2019, Helping Hands Initiative partners with community associations, local government and health authorities to run programmes that communities can sustain themselves once we step back. We currently run active water and food security programmes in Lagos State, and have completed a health outreach programme in Badagry. Every programme is handed over to a local committee, with our team providing ongoing training and support rather than running services indefinitely.',
           ),
         },
       ],
@@ -366,12 +366,12 @@ async function main() {
         {
           blockType: 'hero',
           headline: 'Privacy Policy',
-          subtext: 'How Helping Hive Initiative collects, uses and protects your information.',
+          subtext: 'How Helping Hands Initiative collects, uses and protects your information.',
         },
         {
           blockType: 'richText',
           content: richText(
-            'Helping Hive Initiative collects only the information needed to process donations, respond to enquiries and register volunteers. We never sell or share personal information with third parties for marketing purposes. Donation and payment details are processed by our payment partner, Paystack, and are not stored on our own servers. If you have questions about your data, contact us at privacy@helpinghiveinitiative.org.',
+            'Helping Hands Initiative collects only the information needed to process donations, respond to enquiries and register volunteers. We never sell or share personal information with third parties for marketing purposes. Donation and payment details are processed by our payment partner, Paystack, and are not stored on our own servers. If you have questions about your data, contact us at privacy@helpinghandsinitiative.com.',
           ),
         },
       ],
@@ -385,12 +385,12 @@ async function main() {
   await payload.updateGlobal({
     slug: 'site-settings',
     data: {
-      organisationName: 'Helping Hive Initiative',
+      organisationName: 'Helping Hands Initiative',
       tagline: 'Clean water, food security and health access for underserved Nigerian communities.',
       description:
-        'Helping Hive Initiative is a Lagos-based non-profit running clean water, food security and community health programmes across Nigeria.',
+        'Helping Hands Initiative is a Lagos-based non-profit running clean water, food security and community health programmes across Nigeria.',
       registrationNumber: 'CAC/IT/NO/98213',
-      email: 'hello@helpinghiveinitiative.org',
+      email: 'hello@helpinghandsinitiative.com',
       phone: '+234 803 555 0142',
       address: {
         street: '14 Sanya Adepoju Street',
@@ -414,7 +414,7 @@ async function main() {
         'We work alongside communities across Lagos State on clean water, food security and health access, so progress outlives any single programme.',
       missionHeading: 'Our mission',
       missionBody: richText(
-        'Helping Hive Initiative exists to close the gap between emergency aid and lasting infrastructure. Every programme we run is designed to be handed over to the community that hosts it, so the impact continues long after our team moves on to the next site.',
+        'Helping Hands Initiative exists to close the gap between emergency aid and lasting infrastructure. Every programme we run is designed to be handed over to the community that hosts it, so the impact continues long after our team moves on to the next site.',
       ),
       impactStats: [
         { value: '12', label: 'boreholes drilled' },
@@ -444,7 +444,7 @@ async function main() {
     slug: 'footer',
     data: {
       blurb:
-        'Helping Hive Initiative is a Lagos-based non-profit working on clean water, food security and health access across underserved communities in Nigeria.',
+        'Helping Hands Initiative is a Lagos-based non-profit working on clean water, food security and health access across underserved communities in Nigeria.',
       columns: [
         {
           heading: 'Organisation',
@@ -463,7 +463,7 @@ async function main() {
           ],
         },
       ],
-      copyright: '© 2026 Helping Hive Initiative. All rights reserved.',
+      copyright: '© 2026 Helping Hands Initiative. All rights reserved.',
     },
   })
 

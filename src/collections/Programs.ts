@@ -9,7 +9,7 @@ export const Programs: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'location', 'updatedAt'],
-    description: 'The initiatives Helping Hive runs. Each one gets its own page.',
+    description: 'The initiatives Helping Hands runs. Each one gets its own page.',
   },
   versions: {
     drafts: true,

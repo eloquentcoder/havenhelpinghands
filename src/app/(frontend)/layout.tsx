@@ -3,9 +3,9 @@ import type { Metadata } from 'next'
 import './styles.css'
 
 export const metadata: Metadata = {
-  title: 'Helping Hive Initiative',
+  title: 'Helping Hands Initiative',
   description:
-    'Helping Hive Initiative runs community programmes across Nigeria, from clean water to health outreach.',
+    'Helping Hands Initiative runs community programmes across Nigeria, from clean water to health outreach.',
 }
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
