@@ -70,6 +70,7 @@ export interface Config {
     users: User;
     media: Media;
     programs: Program;
+    team: Team;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -80,6 +81,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     programs: ProgramsSelect<false> | ProgramsSelect<true>;
+    team: TeamSelect<false> | TeamSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -289,6 +291,32 @@ export interface Program {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team".
+ */
+export interface Team {
+  id: number;
+  name: string;
+  /**
+   * Job title.
+   */
+  role: string;
+  group: 'staff' | 'board' | 'volunteer';
+  photo?: (number | null) | Media;
+  bio?: string | null;
+  socials?: {
+    linkedin?: string | null;
+    twitter?: string | null;
+    email?: string | null;
+  };
+  /**
+   * Lower numbers appear first on the About page.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -322,6 +350,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'programs';
         value: number | Program;
+      } | null)
+    | ({
+        relationTo: 'team';
+        value: number | Team;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -479,6 +511,27 @@ export interface ProgramsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team_select".
+ */
+export interface TeamSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
+  group?: T;
+  photo?: T;
+  bio?: T;
+  socials?:
+    | T
+    | {
+        linkedin?: T;
+        twitter?: T;
+        email?: T;
+      };
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
