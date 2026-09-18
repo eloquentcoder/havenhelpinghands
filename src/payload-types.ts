@@ -123,6 +123,11 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
+  name: string;
+  /**
+   * Editors can write and publish content. Admins also manage users.
+   */
+  role: 'admin' | 'editor';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -240,6 +245,8 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
