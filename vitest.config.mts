@@ -8,5 +8,10 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
     include: ['tests/int/**/*.int.spec.ts'],
+    // Booting a real Payload instance is slow, and parallel files racing on one
+    // SQLite file causes lock errors.
+    testTimeout: 60_000,
+    hookTimeout: 60_000,
+    fileParallelism: false,
   },
 })

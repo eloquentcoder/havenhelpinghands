@@ -1,5 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { isAdmin } from '@/access/roles'
+import { adminOrSelf, isAdmin } from '@/access/roles'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -9,9 +9,12 @@ export const Users: CollectionConfig = {
     defaultColumns: ['name', 'email', 'role'],
   },
   access: {
-    read: isAdmin,
+    // Editors may read and update their own record so they can change their
+    // own name and password. Field-level access on `role` below is what stops
+    // them promoting themselves.
+    read: adminOrSelf,
     create: isAdmin,
-    update: isAdmin,
+    update: adminOrSelf,
     delete: isAdmin,
   },
   fields: [
