@@ -105,8 +105,18 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'site-settings': SiteSetting;
+    navigation: Navigation;
+    footer: Footer;
+    homepage: Homepage;
+  };
+  globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    navigation: NavigationSelect<false> | NavigationSelect<true>;
+    footer: FooterSelect<false> | FooterSelect<true>;
+    homepage: HomepageSelect<false> | HomepageSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -1110,6 +1120,288 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  organisationName: string;
+  /**
+   * One line describing what the organisation does.
+   */
+  tagline?: string | null;
+  /**
+   * Used as the search description on pages that have none of their own.
+   */
+  description?: string | null;
+  logo?: (number | null) | Media;
+  /**
+   * Shown when a page with no image of its own is shared.
+   */
+  defaultOgImage?: (number | null) | Media;
+  /**
+   * CAC registration number. Shown in the footer as a trust signal.
+   */
+  registrationNumber?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  /**
+   * Used for local search results. Fill this in fully.
+   */
+  address?: {
+    street?: string | null;
+    city?: string | null;
+    state?: string | null;
+    country?: string | null;
+  };
+  socials?:
+    | {
+        platform: 'facebook' | 'instagram' | 'twitter' | 'linkedin' | 'youtube';
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * The hosted Paystack payment page link. Every Donate button points here.
+   */
+  paystackUrl?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation".
+ */
+export interface Navigation {
+  id: number;
+  items?:
+    | {
+        label: string;
+        /**
+         * For example /programs
+         */
+        url: string;
+        children?:
+          | {
+              label: string;
+              url: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer".
+ */
+export interface Footer {
+  id: number;
+  /**
+   * Short paragraph in the first footer column.
+   */
+  blurb?: string | null;
+  columns?:
+    | {
+        heading: string;
+        links?:
+          | {
+              label: string;
+              url: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  copyright?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "homepage".
+ */
+export interface Homepage {
+  id: number;
+  headline: string;
+  subtext?: string | null;
+  heroImage?: (number | null) | Media;
+  primaryCtaLabel?: string | null;
+  primaryCtaUrl?: string | null;
+  secondaryCtaLabel?: string | null;
+  secondaryCtaUrl?: string | null;
+  missionHeading?: string | null;
+  missionBody?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  impactStats?:
+    | {
+        value: string;
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Up to three programs to show on the homepage.
+   */
+  featuredPrograms?: (number | Program)[] | null;
+  seo?: {
+    /**
+     * Shown as the headline in Google. Aim for under 60 characters. Defaults to the title.
+     */
+    metaTitle?: string | null;
+    /**
+     * The grey text under the headline in Google. Aim for 150-160 characters. Defaults to the summary.
+     */
+    metaDescription?: string | null;
+    /**
+     * The picture shown when this page is shared on WhatsApp, Facebook or X. Defaults to the hero image.
+     */
+    ogImage?: (number | null) | Media;
+    /**
+     * Only fill this in if this content was first published elsewhere and that version should rank instead.
+     */
+    canonicalUrl?: string | null;
+    /**
+     * Hide this page from Google. The page stays reachable by anyone with the link.
+     */
+    noindex?: boolean | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  organisationName?: T;
+  tagline?: T;
+  description?: T;
+  logo?: T;
+  defaultOgImage?: T;
+  registrationNumber?: T;
+  email?: T;
+  phone?: T;
+  address?:
+    | T
+    | {
+        street?: T;
+        city?: T;
+        state?: T;
+        country?: T;
+      };
+  socials?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
+  paystackUrl?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "navigation_select".
+ */
+export interface NavigationSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        children?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer_select".
+ */
+export interface FooterSelect<T extends boolean = true> {
+  blurb?: T;
+  columns?:
+    | T
+    | {
+        heading?: T;
+        links?:
+          | T
+          | {
+              label?: T;
+              url?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  copyright?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "homepage_select".
+ */
+export interface HomepageSelect<T extends boolean = true> {
+  headline?: T;
+  subtext?: T;
+  heroImage?: T;
+  primaryCtaLabel?: T;
+  primaryCtaUrl?: T;
+  secondaryCtaLabel?: T;
+  secondaryCtaUrl?: T;
+  missionHeading?: T;
+  missionBody?: T;
+  impactStats?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
+  featuredPrograms?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        ogImage?: T;
+        canonicalUrl?: T;
+        noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

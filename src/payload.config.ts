@@ -16,6 +16,10 @@ import { Events } from './collections/Events'
 import { Redirects } from './collections/Redirects'
 import { Submissions } from './collections/Submissions'
 import { Pages } from './collections/Pages'
+import { SiteSettings } from './globals/SiteSettings'
+import { Navigation } from './globals/Navigation'
+import { Footer } from './globals/Footer'
+import { Homepage } from './globals/Homepage'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -40,6 +44,7 @@ export default buildConfig({
     Submissions,
     Pages,
   ],
+  globals: [SiteSettings, Navigation, Footer, Homepage],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
