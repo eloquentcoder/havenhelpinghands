@@ -13,6 +13,7 @@ import { Partners } from './collections/Partners'
 import { Categories } from './collections/Categories'
 import { Posts } from './collections/Posts'
 import { Events } from './collections/Events'
+import { Redirects } from './collections/Redirects'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -24,7 +25,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Programs, Team, Partners, Categories, Posts, Events],
+  collections: [Users, Media, Programs, Team, Partners, Categories, Posts, Events, Redirects],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
