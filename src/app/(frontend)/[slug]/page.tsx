@@ -1,13 +1,13 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
-import { getPayloadClient } from '@/lib/payload'
+import { getPayloadClient, publishedOnly } from '@/lib/payload'
 import { RenderBlocks } from '@/components/blocks/RenderBlocks'
 
 const getPage = async (slug: string) => {
   const payload = await getPayloadClient()
   const { docs } = await payload.find({
     collection: 'pages',
-    where: { slug: { equals: slug } },
+    where: { and: [publishedOnly, { slug: { equals: slug } }] },
     limit: 1,
   })
   return docs[0] ?? null
@@ -15,7 +15,7 @@ const getPage = async (slug: string) => {
 
 export async function generateStaticParams() {
   const payload = await getPayloadClient()
-  const { docs } = await payload.find({ collection: 'pages', limit: 100 })
+  const { docs } = await payload.find({ collection: 'pages', limit: 100, depth: 0, where: publishedOnly })
   return docs.map((doc) => ({ slug: doc.slug }))
 }
 

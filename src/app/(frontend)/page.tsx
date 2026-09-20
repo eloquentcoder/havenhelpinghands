@@ -1,13 +1,12 @@
-import Image from 'next/image'
 import Link from 'next/link'
-import { getPayloadClient } from '@/lib/payload'
+import { getPayloadClient, publishedOnly } from '@/lib/payload'
 import { Container } from '@/components/layout/Container'
 import { CountUp } from '@/components/home/CountUp'
 import { Reveal } from '@/components/Reveal'
 import { DonatePanel } from '@/components/home/DonatePanel'
-import type { Media, Program } from '@/payload-types'
+import { MediaImage } from '@/components/media/MediaImage'
+import type { Program } from '@/payload-types'
 
-const isMedia = (v: unknown): v is Media => typeof v === 'object' && v !== null && 'url' in v
 const isProgram = (v: unknown): v is Program => typeof v === 'object' && v !== null && 'slug' in v
 
 /**
@@ -21,35 +20,6 @@ const TARGETS = [
   { value: 1000, label: 'women and youth trained and mentored' },
 ]
 
-/** Six things that have actually happened, in order. */
-const MILESTONES = [
-  {
-    year: '2024',
-    title: 'Christmas Charity Outreach',
-    body: 'Reached two orphanages with psychological support, financial support, gifts and love.',
-  },
-  {
-    year: '2025',
-    title: 'Back-to-School Project',
-    body: 'Partnered with other youth-led NGOs to support children with educational materials and motivation.',
-  },
-  {
-    year: '2025',
-    title: 'Held and Healed Momcation, with SMAP',
-    body: 'A two-day retreat for mothers facing postpartum depression, stress disorders and emotional fatigue — clinical psychological therapy, career sessions, exercise therapy and holistic care.',
-  },
-  {
-    year: '2025',
-    title: 'Registered as Haven Healing Hands Initiative',
-    body: 'Officially approved and registered.',
-  },
-  {
-    year: '2025',
-    title: 'The Mental Health Arm launched',
-    body: 'Opened on World Mental Health Day.',
-  },
-]
-
 const WAYS_TO_HELP = [
   ['Fund a programme', 'Grants, sponsorships and one-off gifts supporting outreaches and the safe haven shelters.'],
   ['Volunteer your profession', 'Medical, mental health, education and logistics.'],
@@ -58,14 +28,30 @@ const WAYS_TO_HELP = [
 
 export default async function HomePage() {
   const payload = await getPayloadClient()
-  const [home, settings, programsResult] = await Promise.all([
+  const [home, settings, programsResult, completedResult] = await Promise.all([
     payload.findGlobal({ slug: 'homepage', depth: 1 }),
     payload.findGlobal({ slug: 'site-settings' }),
-    payload.find({ collection: 'programs', limit: 8, sort: 'createdAt' }),
+    payload.find({
+      collection: 'programs',
+      limit: 8,
+      sort: 'createdAt',
+      // Ongoing only. This result feeds both the "Four systems" colonnade and
+      // the "Systems of care" figure in the brass panel, so an unfiltered
+      // query would publish a false count the moment a completed programme
+      // exists.
+      where: { and: [publishedOnly, { status: { equals: 'ongoing' } }] },
+    }),
+    payload.find({
+      collection: 'programs',
+      limit: 6,
+      depth: 1,
+      sort: '-completedAt',
+      where: { and: [publishedOnly, { status: { equals: 'completed' } }] },
+    }),
   ])
 
-  const heroImage = isMedia(home.heroImage) ? home.heroImage : null
   const systems = programsResult.docs.filter(isProgram)
+  const completed = completedResult.docs.filter(isProgram)
   const donateUrl = settings.paystackUrl || '/donate'
   const headlineLines = home.headline.split('.').filter(Boolean)
 
@@ -76,25 +62,24 @@ export default async function HomePage() {
           rather than an empty frame. The right half is the giving block, so the
           decision to give is made on the first screen. */}
       <section className="grid lg:min-h-[calc(100svh-68px)] lg:grid-cols-2">
-        <div className="relative flex min-h-[26rem] flex-col justify-end overflow-hidden bg-teal-950 p-8 text-paper-50 sm:p-12 lg:p-14">
-          {heroImage?.url ? (
-            <>
-              <Image
-                src={heroImage.url}
-                alt={heroImage.alt ?? ''}
-                fill
-                priority
-                sizes="(min-width: 1024px) 50vw, 100vw"
-                className="object-cover grayscale"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-teal-950 via-teal-950/70 to-teal-950/20" />
-            </>
-          ) : (
-            <div
-              aria-hidden="true"
-              className="arch arch-open absolute top-1/2 left-1/2 h-[80%] w-[70%] -translate-x-1/2 -translate-y-[55%] bg-gradient-to-b from-teal-800 to-teal-950"
-            />
-          )}
+        <div className="relative flex min-h-[26rem] flex-col justify-end overflow-hidden bg-teal-600 p-8 text-paper-50 sm:p-12 lg:p-14">
+          {/* No grayscale. It was chosen for a photograph; the stand-in here is
+              brand artwork, and desaturating it removes the only thing it is
+              made of. Worth revisiting if a real photograph ever lands. */}
+          <MediaImage
+            media={home.heroImage}
+            alt=""
+            fill
+            preload
+            variant="hero"
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            className="object-cover"
+            fallbackClassName="arch arch-open absolute top-1/2 left-1/2 h-[80%] w-[70%] -translate-x-1/2 -translate-y-[55%]"
+          />
+          {/* Weighted to the bottom, where the headline and standfirst sit. The
+              top is left nearly clear so the picture is actually visible —
+              an even scrim just turns the panel into a dark rectangle. */}
+          <div className="absolute inset-0 bg-gradient-to-t from-teal-800/95 via-teal-800/55 to-teal-800/5" />
 
           <div className="relative">
             <h1 className="font-display text-[clamp(2.5rem,4.6vw,4rem)]">
@@ -157,7 +142,7 @@ export default async function HomePage() {
               ['Systems of care', String(systems.length || 4)],
             ].map(([label, value]) => (
               <div key={label} className="bg-brass-400 px-5 py-4">
-                <dt className="text-xs text-teal-950/70">{label}</dt>
+                <dt className="text-xs text-teal-950/80">{label}</dt>
                 <dd className="mt-0.5 font-display text-xl">{value}</dd>
               </div>
             ))}
@@ -201,7 +186,17 @@ export default async function HomePage() {
               {systems.map((system, i) => (
                 <Reveal as="li" key={system.id} delay={i * 110}>
                   <Link href={`/programs/${system.slug}`} className="group block">
-                    <div className="arch relative aspect-[3/4] overflow-hidden bg-gradient-to-b from-teal-600 to-teal-900 transition-transform duration-500 group-hover:-translate-y-1.5">
+                    <div className="arch relative aspect-[3/4] overflow-hidden bg-teal-700 transition-transform duration-500 group-hover:-translate-y-1.5">
+                      <MediaImage
+                        media={system.heroImage}
+                        alt=""
+                        variant="card"
+                        fill
+                        sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                        className="object-cover"
+                        fallbackClassName="absolute inset-0"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-teal-950/85 via-teal-950/35 to-transparent" />
                       <div className="absolute inset-0 flex items-end p-6">
                         <h3 className="font-display text-[1.35rem] leading-[1.15] text-paper-50">
                           {system.title}
@@ -219,7 +214,7 @@ export default async function HomePage() {
       ) : null}
 
       {/* Targets to 2030 */}
-      <section className="bg-teal-950 py-20 text-paper-50 sm:py-24">
+      <section className="bg-teal-600 py-20 text-paper-50 sm:py-24">
         <Container>
           <Reveal className="max-w-2xl">
             <h2 className="font-display text-[clamp(1.75rem,3.5vw,2.75rem)]">
@@ -233,8 +228,8 @@ export default async function HomePage() {
 
           <dl className="mt-14 grid gap-12 sm:grid-cols-3">
             {TARGETS.map((target, i) => (
-              <Reveal key={target.label} delay={i * 120} className="border-t border-teal-800 pt-6">
-                <dt className="font-display text-[clamp(3rem,6vw,4.5rem)] leading-none text-brass-400">
+              <Reveal key={target.label} delay={i * 120} className="border-t border-teal-300 pt-6">
+                <dt className="font-display text-[clamp(3rem,6vw,4.5rem)] leading-none text-brass-300">
                   <CountUp to={target.value} />
                 </dt>
                 <dd className="mt-4 text-sm leading-relaxed text-teal-200">{target.label}</dd>
@@ -244,36 +239,65 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      {/* Milestones — a real sequence, so it is set as one */}
-      <section className="py-20 sm:py-28">
-        <Container>
-          <Reveal as="h2" className="max-w-2xl font-display text-[clamp(1.75rem,3.5vw,2.75rem)] text-ink-900">
-            What we have done so far
-          </Reveal>
+      {/* What we have done. These are CMS records now, not a hardcoded list,
+          so each one is a page a visitor can open — and the owner can add the
+          next outreach without a deploy.
 
-          <ol className="mt-14 max-w-3xl">
-            {MILESTONES.map((milestone, i) => (
-              <Reveal
-                as="li"
-                key={milestone.title}
-                delay={i * 80}
-                className="grid gap-4 border-t border-paper-200 py-8 sm:grid-cols-[5rem_1fr] sm:gap-8"
-              >
-                <p className="font-display text-xl text-brass-600">{milestone.year}</p>
-                <div>
-                  <h3 className="font-display text-xl text-ink-900">{milestone.title}</h3>
-                  <p className="mt-2.5 leading-relaxed text-ink-500">{milestone.body}</p>
-                </div>
-              </Reveal>
-            ))}
-          </ol>
+          The three organisational milestones from the source document — the
+          registration, the Mental Health Arm launch and the volunteer network
+          — stay as the closing paragraph rather than becoming programmes. A
+          registration certificate with its own "Support this work" button
+          would be absurd. */}
+      {completed.length > 0 ? (
+        <section className="py-20 sm:py-28">
+          <Container>
+            <Reveal className="max-w-2xl">
+              <h2 className="font-display text-[clamp(1.75rem,3.5vw,2.75rem)] text-ink-900">
+                What we have done so far
+              </h2>
+              <p className="mt-5 text-ink-500">
+                Outreaches that have already happened. Open any one to read more.
+              </p>
+            </Reveal>
 
-          <p className="mt-8 max-w-3xl border-t border-paper-200 pt-8 text-ink-500">
-            Alongside these, an active volunteer network and a growing social media presence for
-            awareness and impact storytelling.
-          </p>
-        </Container>
-      </section>
+            <ul className="mt-14 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+              {completed.map((programme, i) => (
+                <Reveal as="li" key={programme.id} delay={i * 90}>
+                  <Link href={`/programs/${programme.slug}`} className="group block">
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-teal-700">
+                      <MediaImage
+                        media={programme.heroImage}
+                        alt=""
+                        variant="card"
+                        fill
+                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                        fallbackClassName="absolute inset-0"
+                      />
+                    </div>
+                    {programme.completedAt ? (
+                      <p className="mt-5 font-display text-sm text-brass-600">
+                        {new Date(programme.completedAt).getFullYear()}
+                      </p>
+                    ) : null}
+                    <h3 className="mt-1 font-display text-xl text-ink-900 group-hover:underline">
+                      {programme.title}
+                    </h3>
+                    <p className="mt-2.5 leading-relaxed text-ink-500">{programme.summary}</p>
+                  </Link>
+                </Reveal>
+              ))}
+            </ul>
+
+            <p className="mt-12 max-w-3xl border-t border-paper-200 pt-8 text-ink-500">
+              Alongside these: officially approved and registered as Haven Healing Hands Initiative
+              in 2025, the Mental Health Arm launched on World Mental Health Day 2025, and an active
+              volunteer network and growing social media presence for awareness and impact
+              storytelling.
+            </p>
+          </Container>
+        </section>
+      ) : null}
 
       {/* Give */}
       <section className="bg-paper-100 py-20 sm:py-28">
@@ -293,7 +317,7 @@ export default async function HomePage() {
               Donate
             </Link>
             {!settings.paystackUrl ? (
-              <p className="mt-4 text-sm text-ink-400">
+              <p className="mt-4 text-sm text-ink-500">
                 Online giving opens once the payment link is added in the CMS.
               </p>
             ) : null}

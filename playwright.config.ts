@@ -9,6 +9,12 @@ import 'dotenv/config'
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
+/**
+ * The port is configurable because 3000 is not always free, and a hard-coded
+ * base URL makes the suite unrunnable when something else has the port.
+ */
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000'
+
 export default defineConfig({
   testDir: './tests/e2e',
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -21,8 +27,8 @@ export default defineConfig({
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    // baseURL: 'http://localhost:3000',
+    /* Base URL, so tests can call page.goto('/programs'). */
+    baseURL,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -36,6 +42,6 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     reuseExistingServer: true,
-    url: 'http://localhost:3000',
+    url: baseURL,
   },
 })

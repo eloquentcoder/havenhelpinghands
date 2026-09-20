@@ -19,10 +19,17 @@ export async function Header() {
   // menu panel to the header instead of the viewport. The header is opaque, so
   // the blur bought nothing.
   return (
-    <header className="sticky top-0 z-50 bg-teal-950 text-paper-50">
+    <header
+      className="sticky top-0 z-50 bg-teal-500 text-paper-50 shadow-[inset_0_-1px_0_rgb(255_255_255_/_0.16)]"
+    >
       <Container className="flex items-center justify-between gap-8 py-4">
         <Link href="/" className="flex shrink-0 items-center gap-3">
-          <Image src="/logo-mark.png" alt="" width={167} height={167} className="h-9 w-9" priority />
+          {/* The mark is a solid #006d77 disc with the hands knocked out in white, so
+              on the teal-500 header it would sit at 1.00:1 and vanish. The paper
+              ring is what keeps the disc readable as a disc. */}
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-paper-50 p-[3px]">
+            <Image src="/logo-mark.png" alt="" width={167} height={167} className="h-full w-full" preload />
+          </span>
           <span className="font-display text-lg leading-none">
             Haven Healing Hands
           </span>
@@ -33,7 +40,7 @@ export async function Header() {
             <Link
               key={item.id ?? item.url}
               href={item.url}
-              className="relative py-1 text-sm text-paper-200 transition-colors hover:text-paper-50 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-brass-400 after:transition-all after:duration-300 hover:after:w-full"
+              className="relative py-1 text-sm text-paper-200 transition-colors hover:text-paper-50 after:absolute after:bottom-0 after:left-0 after:h-px after:w-0 after:bg-brass-100 after:transition-all after:duration-300 hover:after:w-full"
             >
               {item.label}
             </Link>
@@ -43,7 +50,7 @@ export async function Header() {
         <div className="flex shrink-0 items-center gap-2">
           <Link
             href={donateUrl}
-            className="rounded-full bg-brass-400 px-5 py-2.5 text-sm font-semibold text-teal-950 transition-colors hover:bg-brass-300"
+            className="rounded-full bg-brass-300 px-5 py-2.5 text-sm font-semibold text-teal-950 transition-colors hover:bg-brass-100"
           >
             Donate
           </Link>

@@ -35,7 +35,7 @@ export function MobileNav({ items }: { items: Item[] }) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls="mobile-nav"
-        className="flex h-10 w-10 items-center justify-center rounded-full text-paper-50 transition-colors hover:bg-teal-900"
+        className="flex h-10 w-10 items-center justify-center rounded-full text-paper-50 transition-colors hover:bg-teal-700"
       >
         <span className="sr-only">{open ? 'Close menu' : 'Open menu'}</span>
         <svg width="20" height="14" viewBox="0 0 20 14" aria-hidden="true">
@@ -72,12 +72,12 @@ export function MobileNav({ items }: { items: Item[] }) {
         <div
           id="mobile-nav"
           ref={panelRef}
-          className="fixed inset-x-0 top-[68px] bottom-0 z-40 overflow-y-auto bg-teal-950 px-5 pb-10"
+          className="fixed inset-x-0 top-[68px] bottom-0 z-40 overflow-y-auto bg-teal-500 px-5 pb-10"
         >
           <nav aria-label="Main">
             <ul>
               {items.map((item) => (
-                <li key={item.id ?? item.url} className="border-b border-teal-800">
+                <li key={item.id ?? item.url} className="border-b border-white/20">
                   <Link
                     href={item.url}
                     onClick={() => setOpen(false)}

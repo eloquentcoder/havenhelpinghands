@@ -15,10 +15,12 @@ export async function Footer() {
   const instagram = (settings.socials ?? []).find((s) => s.platform === 'instagram')
 
   return (
-    <footer className="bg-teal-950 text-paper-200">
+    <footer className="bg-teal-700 text-paper-200">
       <Container className="grid gap-14 py-20 md:grid-cols-[1.5fr_repeat(2,1fr)]">
         <div className="max-w-sm">
-          <Image src="/logo-mark.png" alt="" width={167} height={167} className="h-12 w-12" />
+          <span className="grid h-12 w-12 place-items-center rounded-full bg-paper-50 p-1">
+            <Image src="/logo-mark.png" alt="" width={167} height={167} className="h-full w-full" />
+          </span>
           <p className="mt-6 font-display text-2xl leading-tight text-paper-50">
             {settings.tagline}
           </p>
@@ -41,9 +43,9 @@ export async function Footer() {
         ))}
       </Container>
 
-      <div className="border-t border-teal-800">
+      <div className="border-t border-white/15">
         <Container className="flex flex-col gap-3 py-7 text-sm sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-ink-400">{footer.copyright}</p>
+          <p className="text-teal-200">{footer.copyright}</p>
           <p className="flex flex-wrap items-center gap-x-6 gap-y-2">
             {settings.email ? (
               <a href={`mailto:${settings.email}`} className="transition-colors hover:text-brass-300">
@@ -59,7 +61,7 @@ export async function Footer() {
                 Instagram
               </a>
             ) : null}
-            {address ? <span className="text-ink-400">{address}</span> : null}
+            {address ? <span className="text-teal-200">{address}</span> : null}
           </p>
         </Container>
       </div>

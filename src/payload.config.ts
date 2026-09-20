@@ -1,5 +1,5 @@
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { FixedToolbarFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
@@ -20,6 +20,7 @@ import { SiteSettings } from './globals/SiteSettings'
 import { Navigation } from './globals/Navigation'
 import { Footer } from './globals/Footer'
 import { Homepage } from './globals/Homepage'
+import { PageHeaders } from './globals/PageHeaders'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -44,8 +45,19 @@ export default buildConfig({
     Submissions,
     Pages,
   ],
-  globals: [SiteSettings, Navigation, Footer, Homepage],
-  editor: lexicalEditor(),
+  globals: [SiteSettings, Navigation, Footer, Homepage, PageHeaders],
+  // Payload's default feature set ships only the inline toolbar — the popup
+  // that appears over a selection. It overlaps the line beneath it and closes
+  // the moment the selection is lost, which makes a format easy to apply and
+  // just as easy to lose before the document is saved. The fixed toolbar sits
+  // above the field and stays there.
+  //
+  // `features` replaces the defaults outright, so defaultFeatures is spread
+  // back in — returning only the toolbar would take bold, links and headings
+  // with it.
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+  }),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),

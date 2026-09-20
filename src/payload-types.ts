@@ -110,12 +110,14 @@ export interface Config {
     navigation: Navigation;
     footer: Footer;
     homepage: Homepage;
+    'page-headers': PageHeader;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     navigation: NavigationSelect<false> | NavigationSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     homepage: HomepageSelect<false> | HomepageSelect<true>;
+    'page-headers': PageHeadersSelect<false> | PageHeadersSelect<true>;
   };
   locale: null;
   widgets: {
@@ -269,6 +271,10 @@ export interface Program {
    * Where this runs, for example "Ikorodu, Lagos State". Used for local search.
    */
   location?: string | null;
+  /**
+   * When this finished. Only used for completed programmes.
+   */
+  completedAt?: string | null;
   status: 'ongoing' | 'completed';
   impactStats?:
     | {
@@ -469,6 +475,12 @@ export interface Event {
     };
     [k: string]: unknown;
   } | null;
+  gallery?:
+    | {
+        image: number | Media;
+        id?: string | null;
+      }[]
+    | null;
   startsAt: string;
   endsAt?: string | null;
   /**
@@ -601,6 +613,36 @@ export interface Page {
         blockType: 'richText';
       }
     | {
+        image: number | Media;
+        /**
+         * How wide the picture sits on the page.
+         */
+        width: 'text' | 'wide' | 'full';
+        /**
+         * Cropping to a fixed shape uses the focal point set on the image itself.
+         */
+        aspect: 'natural' | '16/9' | '4/3' | '21/9';
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'image';
+      }
+    | {
+        heading?: string | null;
+        /**
+         * How many pictures sit side by side on a wide screen.
+         */
+        columns: '2' | '3' | '4';
+        images?:
+          | {
+              image: number | Media;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'gallery';
+      }
+    | {
         heading?: string | null;
         items?:
           | {
@@ -618,6 +660,21 @@ export interface Page {
         id?: string | null;
         blockName?: string | null;
         blockType: 'stats';
+      }
+    | {
+        heading?: string | null;
+        intro?: string | null;
+        /**
+         * Which people to show. They appear in the order set by the "Order" number on each team member.
+         */
+        group: 'all' | 'staff' | 'board' | 'volunteer';
+        /**
+         * Show each person’s short bio under their name.
+         */
+        showBio?: boolean | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'team';
       }
     | {
         heading: string;
@@ -862,6 +919,7 @@ export interface ProgramsSelect<T extends boolean = true> {
         id?: T;
       };
   location?: T;
+  completedAt?: T;
   status?: T;
   impactStats?:
     | T
@@ -970,6 +1028,12 @@ export interface EventsSelect<T extends boolean = true> {
   summary?: T;
   coverImage?: T;
   body?: T;
+  gallery?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
   startsAt?: T;
   endsAt?: T;
   venue?: T;
@@ -1042,6 +1106,29 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        image?:
+          | T
+          | {
+              image?: T;
+              width?: T;
+              aspect?: T;
+              id?: T;
+              blockName?: T;
+            };
+        gallery?:
+          | T
+          | {
+              heading?: T;
+              columns?: T;
+              images?:
+                | T
+                | {
+                    image?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
         stats?:
           | T
           | {
@@ -1053,6 +1140,16 @@ export interface PagesSelect<T extends boolean = true> {
                     label?: T;
                     id?: T;
                   };
+              id?: T;
+              blockName?: T;
+            };
+        team?:
+          | T
+          | {
+              heading?: T;
+              intro?: T;
+              group?: T;
+              showBio?: T;
               id?: T;
               blockName?: T;
             };
@@ -1289,6 +1386,68 @@ export interface Homepage {
   createdAt?: string | null;
 }
 /**
+ * The heading bands at the top of the listing pages. The homepage hero is edited under Homepage, and a programme or post uses its own title and picture.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "page-headers".
+ */
+export interface PageHeader {
+  id: number;
+  /**
+   * The band at the top of /programs.
+   */
+  programs?: {
+    /**
+     * Leave blank to keep the current wording.
+     */
+    headline?: string | null;
+    /**
+     * The sentence under the heading. Leave blank to keep the current one.
+     */
+    standfirst?: string | null;
+    /**
+     * Optional background picture. The heading sits over a dark teal wash so it stays readable whatever you upload.
+     */
+    image?: (number | null) | Media;
+  };
+  /**
+   * The band at the top of /blog.
+   */
+  blog?: {
+    /**
+     * Leave blank to keep the current wording.
+     */
+    headline?: string | null;
+    /**
+     * The sentence under the heading. Leave blank to keep the current one.
+     */
+    standfirst?: string | null;
+    /**
+     * Optional background picture. The heading sits over a dark teal wash so it stays readable whatever you upload.
+     */
+    image?: (number | null) | Media;
+  };
+  /**
+   * The band at the top of /events.
+   */
+  events?: {
+    /**
+     * Leave blank to keep the current wording.
+     */
+    headline?: string | null;
+    /**
+     * The sentence under the heading. Leave blank to keep the current one.
+     */
+    standfirst?: string | null;
+    /**
+     * Optional background picture. The heading sits over a dark teal wash so it stays readable whatever you upload.
+     */
+    image?: (number | null) | Media;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings_select".
  */
@@ -1398,6 +1557,36 @@ export interface HomepageSelect<T extends boolean = true> {
         ogImage?: T;
         canonicalUrl?: T;
         noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "page-headers_select".
+ */
+export interface PageHeadersSelect<T extends boolean = true> {
+  programs?:
+    | T
+    | {
+        headline?: T;
+        standfirst?: T;
+        image?: T;
+      };
+  blog?:
+    | T
+    | {
+        headline?: T;
+        standfirst?: T;
+        image?: T;
+      };
+  events?:
+    | T
+    | {
+        headline?: T;
+        standfirst?: T;
+        image?: T;
       };
   updatedAt?: T;
   createdAt?: T;

@@ -1,6 +1,10 @@
 import Link from 'next/link'
 import { RichText } from '@payloadcms/richtext-lexical/react'
 import { Container } from '@/components/layout/Container'
+import { MediaImage } from '@/components/media/MediaImage'
+import { PhotoGrid } from '@/components/media/PhotoGrid'
+import { TeamGridBlock } from './TeamGridBlock'
+import { resolveMedia } from '@/lib/media'
 import type { Page } from '@/payload-types'
 
 type Block = NonNullable<Page['layout']>[number]
@@ -12,8 +16,27 @@ export function RenderBlocks({ blocks }: { blocks: Block[] }) {
         switch (block.blockType) {
           case 'hero':
             return (
-              <section key={block.id ?? i} className="bg-teal-950 py-20 text-paper-50 sm:py-24">
-                <Container size="prose" className="">
+              <section
+                key={block.id ?? i}
+                className="relative overflow-hidden bg-teal-600 py-20 text-paper-50 sm:py-24"
+              >
+                {/* Hero.image has existed since the block was written and was
+                    never rendered — an editor could pick a picture and watch it
+                    silently do nothing. */}
+                {resolveMedia(block.image) ? (
+                  <>
+                    <MediaImage
+                      media={block.image}
+                      alt=""
+                      variant="hero"
+                      fill
+                      sizes="100vw"
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-teal-700 via-teal-700/85 to-teal-700/70" />
+                  </>
+                ) : null}
+                <Container size="prose" className="relative">
                   <h1 className="font-display text-[clamp(2.25rem,5vw,3.75rem)]">
                     {block.headline}
                   </h1>
@@ -36,7 +59,7 @@ export function RenderBlocks({ blocks }: { blocks: Block[] }) {
             return (
               <section key={block.id ?? i} className="py-16 sm:py-20">
                 <Container size="text" className="">
-                  <div className="text-lg leading-[1.75] text-ink-700 [&_h2]:mt-12 [&_h2]:font-display [&_h2]:text-2xl [&_h2]:text-ink-900 [&_li]:mt-2.5 [&_p]:mt-5 [&_ul]:mt-5 [&_ul]:list-disc [&_ul]:pl-5">
+                  <div className="prose-hhhi text-lg leading-[1.75] text-ink-700">
                     <RichText data={block.content} />
                   </div>
                 </Container>
@@ -45,15 +68,15 @@ export function RenderBlocks({ blocks }: { blocks: Block[] }) {
 
           case 'stats':
             return (
-              <section key={block.id ?? i} className="bg-teal-950 py-16 text-paper-50">
+              <section key={block.id ?? i} className="bg-teal-600 py-16 text-paper-50">
                 <Container>
                   {block.heading ? (
                     <h2 className="font-display text-3xl">{block.heading}</h2>
                   ) : null}
                   <dl className="mt-10 grid gap-10 sm:grid-cols-3">
                     {(block.items ?? []).map((item) => (
-                      <div key={item.id ?? item.label} className="border-t border-teal-800 pt-5">
-                        <dt className="font-display text-5xl text-brass-400">{item.value}</dt>
+                      <div key={item.id ?? item.label} className="border-t border-teal-300 pt-5">
+                        <dt className="font-display text-5xl text-brass-300">{item.value}</dt>
                         <dd className="mt-3 text-sm text-teal-200">{item.label}</dd>
                       </div>
                     ))}
@@ -77,6 +100,73 @@ export function RenderBlocks({ blocks }: { blocks: Block[] }) {
                 </Container>
               </section>
             )
+
+          case 'image': {
+            const media = resolveMedia(block.image)
+            if (!media) return null
+            const aspect =
+              block.aspect === '16/9'
+                ? 'aspect-[16/9]'
+                : block.aspect === '4/3'
+                  ? 'aspect-[4/3]'
+                  : block.aspect === '21/9'
+                    ? 'aspect-[21/9]'
+                    : null
+            const figure = (
+              <figure>
+                {aspect ? (
+                  <div className={`relative ${aspect} overflow-hidden rounded-xl bg-teal-100`}>
+                    <MediaImage
+                      media={media}
+                      variant="hero"
+                      fill
+                      sizes={block.width === 'text' ? '(min-width: 768px) 42rem, 100vw' : '100vw'}
+                      className="object-cover"
+                    />
+                  </div>
+                ) : (
+                  <MediaImage
+                    media={media}
+                    variant="hero"
+                    sizes={block.width === 'text' ? '(min-width: 768px) 42rem, 100vw' : '100vw'}
+                    className="h-auto w-full rounded-xl"
+                  />
+                )}
+                {media.caption ? (
+                  <figcaption className="mt-3 text-sm text-ink-500">{media.caption}</figcaption>
+                ) : null}
+              </figure>
+            )
+            return (
+              <section key={block.id ?? i} className="py-12 sm:py-16">
+                {block.width === 'full' ? (
+                  figure
+                ) : (
+                  <Container size={block.width === 'text' ? 'text' : 'wide'}>{figure}</Container>
+                )}
+              </section>
+            )
+          }
+
+          case 'gallery':
+            return (
+              <section key={block.id ?? i} className="bg-paper-100 py-16 sm:py-20">
+                <Container>
+                  {block.heading ? (
+                    <h2 className="font-display text-3xl text-ink-900">{block.heading}</h2>
+                  ) : null}
+                  <div className={block.heading ? 'mt-8' : ''}>
+                    <PhotoGrid
+                      items={block.images ?? []}
+                      columns={Number(block.columns ?? '3') as 2 | 3 | 4}
+                    />
+                  </div>
+                </Container>
+              </section>
+            )
+
+          case 'team':
+            return <TeamGridBlock key={block.id ?? i} block={block} />
 
           default:
             return null

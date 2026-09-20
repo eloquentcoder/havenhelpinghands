@@ -6,6 +6,9 @@ import { Hero } from '@/blocks/Hero'
 import { RichText } from '@/blocks/RichText'
 import { Stats } from '@/blocks/Stats'
 import { CallToAction } from '@/blocks/CallToAction'
+import { ImageBlock } from '@/blocks/ImageBlock'
+import { Gallery } from '@/blocks/Gallery'
+import { TeamGrid } from '@/blocks/TeamGrid'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -34,7 +37,7 @@ export const Pages: CollectionConfig = {
               type: 'blocks',
               required: true,
               minRows: 1,
-              blocks: [Hero, RichText, Stats, CallToAction],
+              blocks: [Hero, RichText, ImageBlock, Gallery, Stats, TeamGrid, CallToAction],
               admin: { description: 'Build the page by adding and reordering sections.' },
             },
           ],

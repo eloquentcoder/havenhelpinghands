@@ -1,6 +1,57 @@
-# Payload Blank Template
+# Haven Healing Hands Initiative
 
-This template comes configured with the bare minimum to get started on anything you need.
+The public site and CMS for HHHI, a faith-based non-profit in Abuja, Nigeria.
+Next.js (App Router) + Payload 3 + SQLite.
+
+## Images, and the placeholders standing in for them
+
+The owner has not supplied photographs yet, so every picture on the site is
+**generated brand artwork** — teal and brass arches derived from the logo's own
+geometry, produced by `src/lib/placeholderArt.ts` and uploaded by the seed as
+ordinary Media documents.
+
+They are drawings, not photographs, on purpose. A stock or AI photo of a woman
+in a clinic, placed on this site, reads as a photograph of someone HHHI
+actually helped — a false claim about a real registered charity. A drawing of
+an arch claims nothing.
+
+**To replace one, no code change is needed.** In `/admin` → Media, any document
+whose filename starts with `hhhi-placeholder-` is a stand-in; its alt text
+(which is also its title in the admin list) says so. Upload the real photograph
+over it, write proper alt text, and set the focal point. The site picks it up
+immediately.
+
+### Where each picture is edited
+
+| On the site | In the admin |
+| --- | --- |
+| Homepage hero | Globals → Homepage → Hero → Hero image |
+| Headers on /programs, /blog, /events | Globals → Page headers |
+| A programme's hero and gallery | Programs → *the programme* → Content |
+| A post or event cover | Blog & news / Events → *the entry* → Content |
+| A picture inside any other page | Pages → *the page* → add an Image or Gallery block |
+| Team photos | Team → *the person* → Photo |
+
+A listing page header falls back to the wording written into the page when its
+field is left blank, so clearing one restores the default rather than emptying
+the band. Uploaded header images sit under a dark teal wash, which keeps the
+heading readable whatever the picture.
+
+Note that `npm run seed` regenerates the placeholders and **deletes any media
+whose filename still starts with `hhhi-placeholder-`**. It never touches
+anything else, so a photograph uploaded under its own name is safe — but the
+seed is destructive to programmes, pages and team members generally. Do not run
+it against a site the owner has started editing.
+
+## Colour
+
+The brand teal is `#006d77`, sampled from `public/logo.png`. It is
+`--color-teal-500` in the `@theme` block of `src/app/(frontend)/styles.css`,
+which is the single source of truth for the palette — there is no
+`tailwind.config`. Surfaces use `teal-500` (header), `teal-600` (hero and
+section bands) and `teal-700` (footer). The `teal-900`/`teal-950` end of the
+scale is deliberately not used for large surfaces: it reads as black rather
+than as the logo.
 
 ## Quick start
 

@@ -6,6 +6,11 @@ import { Footer } from '@/components/layout/Footer'
 import './styles.css'
 
 export const metadata: Metadata = {
+  // Payload returns relative media URLs, and Next resolves Open Graph images
+  // against this. Without it every social scraper drops the share image.
+  // Setting Payload's own serverURL instead would change every Media.url and
+  // break the images.localPatterns match in next.config.ts.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
   title: {
     default: 'Haven Healing Hands Initiative',
     template: '%s | Haven Healing Hands Initiative',

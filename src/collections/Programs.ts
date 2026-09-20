@@ -66,6 +66,20 @@ export const Programs: CollectionConfig = {
               },
             },
             {
+              // The date the work happened, for programmes that have finished.
+              // Without it, "What we have done" can only sort on createdAt,
+              // which is the seed timestamp - so an outreach added later
+              // through the admin would always sort last, whenever it actually
+              // took place.
+              name: 'completedAt',
+              type: 'date',
+              admin: {
+                date: { pickerAppearance: 'dayOnly' },
+                description: 'When this finished. Only used for completed programmes.',
+                condition: (_, siblingData) => siblingData?.status === 'completed',
+              },
+            },
+            {
               name: 'status',
               type: 'select',
               required: true,

@@ -36,8 +36,8 @@ export function DonatePanel({ paystackUrl }: { paystackUrl?: string | null }) {
               aria-pressed={selected}
               className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
                 selected
-                  ? 'bg-teal-950 text-paper-50'
-                  : 'bg-teal-950/10 text-teal-950 hover:bg-teal-950/20'
+                  ? 'bg-teal-600 text-paper-50'
+                  : 'bg-teal-950/10 text-teal-950 ring-1 ring-teal-950/40 hover:bg-teal-950/20'
               }`}
             >
               {naira(value)}
@@ -50,8 +50,8 @@ export function DonatePanel({ paystackUrl }: { paystackUrl?: string | null }) {
           aria-pressed={amount === null}
           className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
             amount === null
-              ? 'bg-teal-950 text-paper-50'
-              : 'bg-teal-950/10 text-teal-950 hover:bg-teal-950/20'
+              ? 'bg-teal-600 text-paper-50'
+              : 'bg-teal-950/10 text-teal-950 ring-1 ring-teal-950/40 hover:bg-teal-950/20'
           }`}
         >
           Other
@@ -60,13 +60,13 @@ export function DonatePanel({ paystackUrl }: { paystackUrl?: string | null }) {
 
       <a
         href={href}
-        className="mt-7 inline-flex items-center justify-center rounded-lg bg-teal-950 px-9 py-4 font-semibold text-paper-50 transition-transform duration-200 hover:-translate-y-0.5"
+        className="mt-7 inline-flex items-center justify-center rounded-lg bg-teal-600 px-9 py-4 font-semibold text-paper-50 transition-transform duration-200 hover:-translate-y-0.5"
       >
         {amount ? `Donate ${naira(amount)}` : 'Choose an amount'}
       </a>
 
       {!paystackUrl ? (
-        <p className="mt-4 max-w-xs text-xs text-teal-950/70">
+        <p className="mt-4 max-w-xs text-xs text-teal-950/80">
           Add your Paystack link in Site settings to start taking gifts here.
         </p>
       ) : null}

@@ -32,6 +32,15 @@ export const Events: CollectionConfig = {
             },
             { name: 'coverImage', type: 'upload', relationTo: 'media' },
             { name: 'body', type: 'richText' },
+            {
+              // Same shape as Programs.gallery on purpose, so one photo-grid
+              // component serves both. What an event is worth after the date
+              // has passed is largely the photographs.
+              name: 'gallery',
+              type: 'array',
+              labels: { singular: 'Photo', plural: 'Photos' },
+              fields: [{ name: 'image', type: 'upload', relationTo: 'media', required: true }],
+            },
           ],
         },
         {

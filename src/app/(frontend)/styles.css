@@ -40,8 +40,16 @@
   --color-ink-500: #5f706c;
   --color-ink-400: #849691;
 
-  --font-display: var(--font-display), ui-serif, Georgia, serif;
-  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  /* The face variables are named after their families rather than their roles
+     because next/font sets them on <html>, and `:root` is that same element —
+     `--font-display: var(--font-display), …` would be a self reference, which
+     the browser drops whole, taking the fallbacks with it.
+
+     Noto Sans leads both chains: it is the only face here that draws the
+     Yoruba and Igbo dot-below characters, and the naira sign. See
+     src/lib/fonts.ts. */
+  --font-display: var(--font-outfit), 'Noto Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-dm-sans), 'Noto Sans', ui-sans-serif, system-ui, sans-serif;
 }
 
 /* These element-level rules must live in @layer base. Unlayered CSS beats
@@ -73,14 +81,18 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* Tuned for a geometric sans, not the Didone this replaced: more weight so a
+     heading still reads as one without a change of family, tighter tracking to
+     close the gaps Outfit's circular bowls open up, and a little more leading
+     because its x-height is far taller than a display serif's. */
   h1,
   h2,
   h3 {
     font-family: var(--font-display);
-    line-height: 1.06;
-    letter-spacing: -0.015em;
+    line-height: 1.08;
+    letter-spacing: -0.022em;
     text-wrap: balance;
-    font-weight: 500;
+    font-weight: 600;
     margin: 0;
   }
 
@@ -100,9 +112,15 @@
     height: auto;
   }
 
+  /* A two-tone ring, because no single colour clears 3:1 on both grounds this
+     site uses. Brass alone is 2.28:1 on the paper body and 2.54:1 on the
+     teal-500 header — it failed WCAG 2.4.11 on light backgrounds before the
+     palette remap, and would have failed on the header after it. The dark halo
+     carries the contrast on paper; the brass ring carries it on teal. */
   :focus-visible {
-    outline: 2px solid var(--color-brass-400);
+    outline: 2px solid var(--color-brass-300);
     outline-offset: 3px;
+    box-shadow: 0 0 0 5px rgb(4 27 29 / 0.55);
     border-radius: 2px;
   }
 }
@@ -176,5 +194,102 @@
   *::after {
     animation: none !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/*
+ * Rich text from the CMS.
+ *
+ * Tailwind's preflight resets every heading to `font-size: inherit`, and the
+ * base rule above restores the display family and weight for h1–h3 but not a
+ * size — deliberately, so that page furniture sizes its own headings with
+ * utilities. Body copy written in the editor has no such author: an editor who
+ * marks a line as Heading 1 in Lexical gets an <h1> that renders at the
+ * paragraph size around it, which is what happened to "Fund a programme" on
+ * Get Involved. Everything the editor can produce is therefore given a size
+ * here.
+ *
+ * The page's own <h1> is the PageHeader, so an in-body Heading 1 is the top of
+ * the *content* hierarchy rather than the page's, and is sized below the
+ * header's clamp to keep that reading order visible.
+ */
+@layer components {
+  .prose-hhhi :is(h1, h2, h3, h4, h5, h6) {
+    font-family: var(--font-display);
+    color: var(--color-ink-900);
+  }
+
+  .prose-hhhi h1 {
+    margin-top: 3rem;
+    font-size: clamp(1.875rem, 4vw, 2.5rem);
+  }
+
+  .prose-hhhi h2 {
+    margin-top: 2.5rem;
+    font-size: 1.5rem;
+  }
+
+  .prose-hhhi h3 {
+    margin-top: 2rem;
+    font-size: 1.25rem;
+  }
+
+  /* h4–h6 sit outside the base rule's h1–h3 selector, so they also need the
+     weight and leading that rule gives the levels above them. */
+  .prose-hhhi :is(h4, h5, h6) {
+    margin-top: 1.75rem;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+  }
+
+  /* `bolder` — preflight's value for <strong> — resolves against the heading's
+     own 600 and lands on 900, which in Outfit is heavy enough to read as a
+     different typeface rather than an emphasis. */
+  .prose-hhhi :is(h1, h2, h3, h4, h5, h6) strong {
+    font-weight: 800;
+  }
+
+  .prose-hhhi > :first-child {
+    margin-top: 0;
+  }
+
+  .prose-hhhi p {
+    margin-top: 1.25rem;
+  }
+
+  .prose-hhhi :is(ul, ol) {
+    margin-top: 1.25rem;
+    padding-left: 1.25rem;
+  }
+
+  .prose-hhhi ul {
+    list-style: disc;
+  }
+
+  .prose-hhhi ol {
+    list-style: decimal;
+  }
+
+  .prose-hhhi li {
+    margin-top: 0.5rem;
+  }
+
+  /* The base `a { color: inherit }` leaves an editor's link indistinguishable
+     from the sentence around it — colour alone would also be the only cue, so
+     the underline stays on. */
+  .prose-hhhi a {
+    color: var(--color-teal-600);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .prose-hhhi blockquote {
+    margin: 1.75rem 0 0;
+    border-left: 3px solid var(--color-brass-400);
+    padding-left: 1.25rem;
+    font-style: italic;
+    color: var(--color-ink-900);
   }
 }
