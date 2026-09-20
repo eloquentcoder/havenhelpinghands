@@ -7,6 +7,13 @@ const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
 
 const nextConfig: NextConfig = {
+  // The production droplet cannot survive the "Running TypeScript" phase of the
+  // build -- tsc loads the whole program graph (including Payload's generated
+  // types) at once and gets OOM-killed. Type-check locally or in CI instead:
+  // `npx tsc --noEmit`, which takes ~5s there.
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   images: {
     // Setting localPatterns restricts EVERY local image, not just the ones
     // listed — so the static brand assets need entries too, or next/image
