@@ -53,7 +53,10 @@ export default async function HomePage() {
   const systems = programsResult.docs.filter(isProgram)
   const completed = completedResult.docs.filter(isProgram)
   const donateUrl = settings.paystackUrl || '/donate'
-  const headlineLines = home.headline.split('.').filter(Boolean)
+  // `headline` is required in the admin, but a database where the Homepage
+  // global has never been saved returns it undefined — which killed the
+  // production build on a fresh deploy rather than rendering an empty hero.
+  const headlineLines = (home.headline ?? '').split('.').filter(Boolean)
 
   return (
     <>
