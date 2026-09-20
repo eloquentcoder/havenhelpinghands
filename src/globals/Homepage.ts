@@ -1,11 +1,13 @@
 import type { GlobalConfig } from 'payload'
 import { anyone, isAdminOrEditor } from '@/access/roles'
 import { seoField } from '@/fields/seo'
+import { revalidatesGlobal } from '@/hooks/revalidate'
 
 export const Homepage: GlobalConfig = {
   slug: 'homepage',
   label: 'Homepage',
   access: { read: anyone, update: isAdminOrEditor },
+  hooks: revalidatesGlobal([['/']]),
   fields: [
     {
       type: 'tabs',

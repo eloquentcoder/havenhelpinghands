@@ -1,10 +1,12 @@
 import type { GlobalConfig } from 'payload'
 import { anyone, isAdminOrEditor } from '@/access/roles'
+import { revalidatesGlobal } from '@/hooks/revalidate'
 
 export const Navigation: GlobalConfig = {
   slug: 'navigation',
   label: 'Navigation',
   access: { read: anyone, update: isAdminOrEditor },
+  hooks: revalidatesGlobal([['/', 'layout']]),
   fields: [
     {
       name: 'items',

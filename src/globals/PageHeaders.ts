@@ -1,5 +1,6 @@
 import type { Field, GlobalConfig } from 'payload'
 import { anyone, isAdminOrEditor } from '@/access/roles'
+import { revalidatesGlobal } from '@/hooks/revalidate'
 
 /**
  * The teal band at the top of a listing page.
@@ -44,6 +45,7 @@ export const PageHeaders: GlobalConfig = {
       'The heading bands at the top of the listing pages. The homepage hero is edited under Homepage, and a programme or post uses its own title and picture.',
   },
   access: { read: anyone, update: isAdminOrEditor },
+  hooks: revalidatesGlobal([['/programs'], ['/blog'], ['/events']]),
   fields: [
     {
       type: 'tabs',

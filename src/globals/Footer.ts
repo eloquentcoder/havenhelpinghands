@@ -1,10 +1,12 @@
 import type { GlobalConfig } from 'payload'
 import { anyone, isAdminOrEditor } from '@/access/roles'
+import { revalidatesGlobal } from '@/hooks/revalidate'
 
 export const Footer: GlobalConfig = {
   slug: 'footer',
   label: 'Footer',
   access: { read: anyone, update: isAdminOrEditor },
+  hooks: revalidatesGlobal([['/', 'layout']]),
   fields: [
     { name: 'blurb', type: 'textarea', admin: { description: 'Short paragraph in the first footer column.' } },
     {

@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { isAdmin, isAdminOrEditor, publishedOrSignedIn } from '@/access/roles'
 import { slugField } from '@/fields/slug'
 import { seoField } from '@/fields/seo'
+import { revalidates } from '@/hooks/revalidate'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -18,6 +19,7 @@ export const Posts: CollectionConfig = {
     update: isAdminOrEditor,
     delete: isAdmin,
   },
+  hooks: revalidates((doc) => [['/blog'], [`/blog/${doc.slug}`]]),
   fields: [
     {
       type: 'tabs',

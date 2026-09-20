@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { isAdmin, isAdminOrEditor, publishedOrSignedIn } from '@/access/roles'
 import { slugField } from '@/fields/slug'
 import { seoField } from '@/fields/seo'
+import { revalidates } from '@/hooks/revalidate'
 
 export const Events: CollectionConfig = {
   slug: 'events',
@@ -16,6 +17,7 @@ export const Events: CollectionConfig = {
     update: isAdminOrEditor,
     delete: isAdmin,
   },
+  hooks: revalidates((doc) => [['/events'], [`/events/${doc.slug}`]]),
   fields: [
     {
       type: 'tabs',

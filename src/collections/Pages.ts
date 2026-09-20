@@ -9,6 +9,7 @@ import { CallToAction } from '@/blocks/CallToAction'
 import { ImageBlock } from '@/blocks/ImageBlock'
 import { Gallery } from '@/blocks/Gallery'
 import { TeamGrid } from '@/blocks/TeamGrid'
+import { revalidates } from '@/hooks/revalidate'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -24,6 +25,8 @@ export const Pages: CollectionConfig = {
     update: isAdminOrEditor,
     delete: isAdmin,
   },
+  // A page is its own URL and nothing else.
+  hooks: revalidates((doc) => [[`/${doc.slug}`]]),
   fields: [
     {
       type: 'tabs',

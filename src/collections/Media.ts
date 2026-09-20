@@ -2,6 +2,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import type { CollectionConfig } from 'payload'
 import { anyone, isAdminOrEditor } from '@/access/roles'
+import { revalidates } from '@/hooks/revalidate'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -32,6 +33,10 @@ export const Media: CollectionConfig = {
     ],
     focalPoint: true,
   },
+  // Replacing a file changes its URL, and any page showing it still holds the
+  // old one. Which pages those are cannot be known from here, so the whole
+  // site goes -- media edits are rare enough for that to be the cheap option.
+  hooks: revalidates(() => [['/', 'layout']]),
   fields: [
     {
       name: 'alt',

@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 import { isAdmin, isAdminOrEditor, publishedOrSignedIn } from '@/access/roles'
 import { slugField } from '@/fields/slug'
 import { seoField } from '@/fields/seo'
+import { revalidates } from '@/hooks/revalidate'
 
 export const Programs: CollectionConfig = {
   slug: 'programs',
@@ -21,6 +22,8 @@ export const Programs: CollectionConfig = {
     update: isAdminOrEditor,
     delete: isAdmin,
   },
+  // Programmes also surface on the homepage, which features the completed ones.
+  hooks: revalidates((doc) => [['/programs'], [`/programs/${doc.slug}`], ['/']]),
   fields: [
     {
       type: 'tabs',

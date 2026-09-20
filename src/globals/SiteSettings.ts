@@ -1,10 +1,13 @@
 import type { GlobalConfig } from 'payload'
 import { anyone, isAdminOrEditor } from '@/access/roles'
+import { revalidatesGlobal } from '@/hooks/revalidate'
 
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
   label: 'Site settings',
   access: { read: anyone, update: isAdminOrEditor },
+  // Read by the header, the footer and the homepage's stats band.
+  hooks: revalidatesGlobal([['/', 'layout']]),
   fields: [
     {
       type: 'tabs',
